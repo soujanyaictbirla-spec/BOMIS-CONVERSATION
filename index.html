@@ -1,257 +1,232 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-  <meta charset="UTF-8">
 
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
 
-  <title>BOMIS CONVERSATION</title>
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
-  <style>
+<title>BOMIS CONVERSATION</title>
 
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f7fb;
-      margin: 0;
-      padding: 20px;
-    }
+<style>
 
-    .container {
-      max-width: 700px;
-      margin: auto;
-      background: white;
-      padding: 25px;
-      border-radius: 15px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-    }
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f7fb;
+  margin: 0;
+  padding: 20px;
+}
 
-    h1 {
-      text-align: center;
-      color: #1d3557;
-      margin-bottom: 5px;
-    }
+.container {
+  max-width: 700px;
+  margin: auto;
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
 
-    .subtitle {
-      text-align: center;
-      color: #666;
-      margin-bottom: 25px;
-    }
+h1 {
+  text-align: center;
+  color: #1d3557;
+}
 
-    label {
-      display: block;
-      margin-top: 15px;
-      font-weight: bold;
-    }
+.subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 25px;
+}
 
-    input,
-    select {
-      width: 100%;
-      padding: 12px;
-      margin-top: 6px;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 16px;
-    }
+label {
+  display: block;
+  margin-top: 15px;
+  font-weight: bold;
+}
 
-    button {
-      width: 100%;
-      padding: 14px;
-      margin-top: 15px;
-      border: none;
-      border-radius: 8px;
-      font-size: 17px;
-      cursor: pointer;
-    }
+input,
+select {
+  width: 100%;
+  padding: 12px;
+  margin-top: 6px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+}
 
-    #startBtn {
-      background: #2a9d8f;
-      color: white;
-    }
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 15px;
+  border: none;
+  border-radius: 8px;
+  font-size: 17px;
+  cursor: pointer;
+}
 
-    #stopBtn {
-      background: #e76f51;
-      color: white;
-    }
+#startBtn {
+  background: #2a9d8f;
+  color: white;
+}
 
-    #downloadBtn {
-      background: #457b9d;
-      color: white;
-    }
+#stopBtn {
+  background: #e76f51;
+  color: white;
+}
 
-    button:disabled {
-      background: #bbb !important;
-      cursor: not-allowed;
-    }
+#downloadBtn {
+  background: #457b9d;
+  color: white;
+}
 
-    .status {
-      margin-top: 20px;
-      padding: 12px;
-      border-radius: 8px;
-      background: #eef3f8;
-      text-align: center;
-    }
+button:disabled {
+  background: #aaa !important;
+  cursor: not-allowed;
+}
 
-    .timer {
-      text-align: center;
-      font-size: 30px;
-      margin-top: 15px;
-      font-weight: bold;
-    }
+.status {
+  margin-top: 20px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #eef3f8;
+  text-align: center;
+}
 
-    .result {
-      margin-top: 20px;
-      padding: 15px;
-      background: #f7f7f7;
-      border-radius: 10px;
-      white-space: pre-wrap;
-      line-height: 1.6;
-      min-height: 80px;
-    }
+.timer {
+  text-align: center;
+  font-size: 30px;
+  margin-top: 15px;
+  font-weight: bold;
+}
 
-    /* Hidden Apps Script bridge */
-    #bridgeFrame {
-      display: none;
-    }
+.result {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f7f7f7;
+  border-radius: 10px;
+  white-space: pre-wrap;
+  line-height: 1.6;
+  min-height: 80px;
+}
 
-  </style>
+#bridgeFrame {
+  display: none;
+}
+
+</style>
 
 </head>
 
-
 <body>
-
 
 <div class="container">
 
-  <h1>🎤 BOMIS CONVERSATION</h1>
+<h1>🎤 BOMIS CONVERSATION</h1>
 
-  <div class="subtitle">
-    Student Conversation Recorder
-  </div>
-
-
-  <label>
-    Student Name
-  </label>
-
-  <input
-    type="text"
-    id="studentName"
-    placeholder="Enter student name"
-  >
+<div class="subtitle">
+Student Conversation Recorder
+</div>
 
 
-  <label>
-    Grade
-  </label>
+<label>Student Name</label>
 
-  <select id="grade">
-
-    <option value="">
-      Select Grade
-    </option>
-
-    <option>Grade 1</option>
-    <option>Grade 2</option>
-    <option>Grade 3</option>
-    <option>Grade 4</option>
-    <option>Grade 5</option>
-    <option>Grade 6</option>
-    <option>Grade 7</option>
-    <option>Grade 8</option>
-    <option>Grade 9</option>
-    <option>Grade 10</option>
-    <option>Grade 11</option>
-    <option>Grade 12</option>
-
-  </select>
+<input
+  type="text"
+  id="studentName"
+  placeholder="Enter student name"
+>
 
 
-  <label>
-    Date
-  </label>
+<label>Grade</label>
 
-  <input
-    type="date"
-    id="date"
-  >
+<select id="grade">
 
+<option value="">Select Grade</option>
 
-  <div
-    class="timer"
-    id="timer"
-  >
-    00:00
-  </div>
+<option>Grade 1</option>
+<option>Grade 2</option>
+<option>Grade 3</option>
+<option>Grade 4</option>
+<option>Grade 5</option>
+<option>Grade 6</option>
+<option>Grade 7</option>
+<option>Grade 8</option>
+<option>Grade 9</option>
+<option>Grade 10</option>
+<option>Grade 11</option>
+<option>Grade 12</option>
 
-
-  <button
-    id="startBtn"
-    onclick="startRecording()"
-  >
-    Start Conversation
-  </button>
+</select>
 
 
-  <button
-    id="stopBtn"
-    onclick="stopRecording()"
-    disabled
-  >
-    Stop Conversation
-  </button>
+<label>Date</label>
+
+<input
+  type="date"
+  id="date"
+>
 
 
-  <button
-    id="downloadBtn"
-    onclick="downloadAudio()"
-    disabled
-  >
-    Download Audio
-  </button>
+<div class="timer" id="timer">
+00:00
+</div>
 
 
-  <div
-    class="status"
-    id="status"
-  >
-    Ready to record
-  </div>
+<button
+  id="startBtn"
+  onclick="startRecording()"
+>
+Start Conversation
+</button>
 
 
-  <div
-    class="result"
-    id="result"
-  >
-    Conversation will appear here.
-  </div>
+<button
+  id="stopBtn"
+  onclick="stopRecording()"
+  disabled
+>
+Stop Conversation
+</button>
+
+
+<button
+  id="downloadBtn"
+  onclick="downloadAudio()"
+  disabled
+>
+Download Audio
+</button>
+
+
+<div
+  class="status"
+  id="status"
+>
+Ready to record
+</div>
+
+
+<div
+  class="result"
+  id="result"
+>
+Conversation will appear here.
+</div>
 
 </div>
 
 
-<!--
-====================================================
-HIDDEN GOOGLE APPS SCRIPT BRIDGE
-====================================================
--->
+<!-- APPS SCRIPT BRIDGE -->
 
 <iframe
   id="bridgeFrame"
   src="https://script.google.com/macros/s/AKfycby4QSe_GgfQINvLb_T5Z6BtzoMNa6Qc14vlKSU6XTrfvM2iH1vBE-ugxnW1DAJzgnZ2eg/exec"
   allow="microphone"
->
-</iframe>
+></iframe>
 
 
 <script>
-
-
-/* ==================================================
-   VARIABLES
-================================================== */
 
 let mediaRecorder = null;
 
@@ -263,14 +238,6 @@ let timerInterval = null;
 
 let seconds = 0;
 
-let bridgeReady = false;
-
-let processing = false;
-
-
-/* ==================================================
-   ELEMENTS
-================================================== */
 
 const bridgeFrame =
   document.getElementById("bridgeFrame");
@@ -297,76 +264,43 @@ const dateInput =
   document.getElementById("date");
 
 
-/* ==================================================
-   TODAY'S DATE
-================================================== */
+/* TODAY'S DATE */
 
-const today =
-  new Date();
+const today = new Date();
 
-const yyyy =
-  today.getFullYear();
+const yyyy = today.getFullYear();
 
 const mm =
   String(today.getMonth() + 1)
-    .padStart(2, "0");
+  .padStart(2, "0");
 
 const dd =
   String(today.getDate())
-    .padStart(2, "0");
+  .padStart(2, "0");
 
 dateInput.value =
   yyyy + "-" + mm + "-" + dd;
 
 
-/* ==================================================
-   PAGE LOAD
-================================================== */
-
-window.addEventListener(
-  "load",
-  function() {
-
-    startBtn.disabled = false;
-
-    stopBtn.disabled = true;
-
-    downloadBtn.disabled = true;
-
-    status.innerText =
-      "Ready to record";
-
-  }
-);
-
-
-/* ==================================================
-   APPS SCRIPT BRIDGE MESSAGE
-================================================== */
+/* RECEIVE MESSAGE FROM APPS SCRIPT */
 
 window.addEventListener(
   "message",
   function(event) {
 
-    const data =
-      event.data;
-
+    const data = event.data;
 
     if (!data || !data.type) {
       return;
     }
 
 
-    /* ----------------------------------------------
-       BRIDGE READY
-    ---------------------------------------------- */
+    /* BRIDGE READY */
 
     if (
       data.type ===
       "BOMIS_BRIDGE_READY"
     ) {
-
-      bridgeReady = true;
 
       status.innerText =
         "Ready to record";
@@ -375,17 +309,26 @@ window.addEventListener(
     }
 
 
-    /* ----------------------------------------------
-       RESULT FROM APPS SCRIPT
-    ---------------------------------------------- */
+    /* PROCESSING */
+
+    if (
+      data.type ===
+      "BOMIS_PROCESSING"
+    ) {
+
+      status.innerText =
+        "⏳ Deepgram is processing...";
+
+      return;
+    }
+
+
+    /* FINAL RESULT */
 
     if (
       data.type ===
       "BOMIS_RESULT"
     ) {
-
-      processing = false;
-
 
       const response =
         data.result;
@@ -397,20 +340,19 @@ window.addEventListener(
       ) {
 
         status.innerText =
-          "Conversation saved successfully";
+          "✅ Conversation saved successfully";
 
 
         resultBox.innerText =
           response.transcript ||
           "No conversation detected.";
 
-
       }
 
       else {
 
         status.innerText =
-          "Error processing conversation";
+          "❌ Error processing conversation";
 
 
         resultBox.innerText =
@@ -427,9 +369,7 @@ window.addEventListener(
 );
 
 
-/* ==================================================
-   START RECORDING
-================================================== */
+/* START */
 
 async function startRecording() {
 
@@ -447,16 +387,6 @@ async function startRecording() {
       .value;
 
 
-  const date =
-    document
-      .getElementById("date")
-      .value;
-
-
-  /* ----------------------------------------------
-     VALIDATE STUDENT
-  ---------------------------------------------- */
-
   if (!studentName) {
 
     alert(
@@ -467,10 +397,6 @@ async function startRecording() {
   }
 
 
-  /* ----------------------------------------------
-     VALIDATE GRADE
-  ---------------------------------------------- */
-
   if (!grade) {
 
     alert(
@@ -480,10 +406,6 @@ async function startRecording() {
     return;
   }
 
-
-  /* ----------------------------------------------
-     MICROPHONE
-  ---------------------------------------------- */
 
   try {
 
@@ -496,10 +418,6 @@ async function startRecording() {
         });
 
 
-    /* ------------------------------------------
-       RESET
-    ------------------------------------------ */
-
     audioChunks = [];
 
     audioBlob = null;
@@ -509,10 +427,6 @@ async function startRecording() {
     timer.innerText =
       "00:00";
 
-
-    /* ------------------------------------------
-       RECORDER OPTIONS
-    ------------------------------------------ */
 
     let options = {};
 
@@ -529,20 +443,12 @@ async function startRecording() {
     }
 
 
-    /* ------------------------------------------
-       CREATE RECORDER
-    ------------------------------------------ */
-
     mediaRecorder =
       new MediaRecorder(
         stream,
         options
       );
 
-
-    /* ------------------------------------------
-       AUDIO DATA
-    ------------------------------------------ */
 
     mediaRecorder.ondataavailable =
       function(event) {
@@ -561,10 +467,6 @@ async function startRecording() {
       };
 
 
-    /* ------------------------------------------
-       WHEN RECORDING STOPS
-    ------------------------------------------ */
-
     mediaRecorder.onstop =
       function() {
 
@@ -580,29 +482,17 @@ async function startRecording() {
           );
 
 
-        /* Enable download */
-
         downloadBtn.disabled =
           false;
 
-
-        /* Send to Apps Script */
 
         sendAudioToServer();
 
       };
 
 
-    /* ------------------------------------------
-       START
-    ------------------------------------------ */
-
     mediaRecorder.start();
 
-
-    /* ------------------------------------------
-       TIMER
-    ------------------------------------------ */
 
     timerInterval =
       setInterval(
@@ -610,10 +500,6 @@ async function startRecording() {
         1000
       );
 
-
-    /* ------------------------------------------
-       BUTTONS
-    ------------------------------------------ */
 
     startBtn.disabled =
       true;
@@ -629,37 +515,27 @@ async function startRecording() {
       "🔴 Recording conversation...";
 
 
-    resultBox.innerText =
-      "";
-
+    resultBox.innerText = "";
 
   }
 
-  catch (error) {
+  catch(error) {
 
+    console.error(error);
 
-    console.error(
-      "Microphone error:",
-      error
+    alert(
+      "Please allow microphone access in Chrome."
     );
-
 
     status.innerText =
       "Microphone permission failed.";
-
-
-    alert(
-      "Please allow microphone access in Chrome and try again."
-    );
 
   }
 
 }
 
 
-/* ==================================================
-   STOP RECORDING
-================================================== */
+/* STOP */
 
 function stopRecording() {
 
@@ -679,11 +555,7 @@ function stopRecording() {
   }
 
 
-  /* Stop microphone */
-
-  if (
-    mediaRecorder.stream
-  ) {
+  if (mediaRecorder.stream) {
 
     mediaRecorder.stream
       .getTracks()
@@ -698,14 +570,10 @@ function stopRecording() {
   }
 
 
-  /* Stop timer */
-
   clearInterval(
     timerInterval
   );
 
-
-  /* Buttons */
 
   stopBtn.disabled =
     true;
@@ -715,55 +583,42 @@ function stopRecording() {
 
 
   status.innerText =
-    "⏳ Processing conversation...";
+    "⏳ Preparing conversation...";
 
 }
 
 
-/* ==================================================
-   TIMER
-================================================== */
+/* TIMER */
 
 function updateTimer() {
-
 
   seconds++;
 
 
   const minutes =
-    Math.floor(
-      seconds / 60
-    )
-    .toString()
-    .padStart(2, "0");
+    Math.floor(seconds / 60)
+      .toString()
+      .padStart(2, "0");
 
 
   const secs =
     (seconds % 60)
-    .toString()
-    .padStart(2, "0");
+      .toString()
+      .padStart(2, "0");
 
 
   timer.innerText =
-    minutes +
-    ":" +
-    secs;
+    minutes + ":" + secs;
 
 }
 
 
-/* ==================================================
-   BLOB → BASE64
-================================================== */
+/* BLOB TO BASE64 */
 
-function blobToBase64(
-  blob
-) {
-
+function blobToBase64(blob) {
 
   return new Promise(
     function(resolve, reject) {
-
 
       const reader =
         new FileReader();
@@ -772,27 +627,19 @@ function blobToBase64(
       reader.onloadend =
         function() {
 
-
           try {
 
-
-            const dataUrl =
+            const result =
               reader.result;
 
-
             const base64 =
-              dataUrl
-                .split(",")[1];
+              result.split(",")[1];
 
-
-            resolve(
-              base64
-            );
-
+            resolve(base64);
 
           }
 
-          catch (error) {
+          catch(error) {
 
             reject(error);
 
@@ -802,16 +649,10 @@ function blobToBase64(
 
 
       reader.onerror =
-        function(error) {
-
-          reject(error);
-
-        };
+        reject;
 
 
-      reader.readAsDataURL(
-        blob
-      );
+      reader.readAsDataURL(blob);
 
     }
   );
@@ -819,9 +660,7 @@ function blobToBase64(
 }
 
 
-/* ==================================================
-   SEND AUDIO TO APPS SCRIPT
-================================================== */
+/* SEND AUDIO */
 
 async function sendAudioToServer() {
 
@@ -829,7 +668,7 @@ async function sendAudioToServer() {
   if (!audioBlob) {
 
     status.innerText =
-      "No audio was recorded.";
+      "No audio recorded.";
 
     return;
   }
@@ -838,14 +677,9 @@ async function sendAudioToServer() {
   try {
 
 
-    processing = true;
-
-
     status.innerText =
-      "⏳ Preparing conversation...";
+      "⏳ Preparing audio...";
 
-
-    /* Convert audio */
 
     const base64 =
       await blobToBase64(
@@ -853,43 +687,34 @@ async function sendAudioToServer() {
       );
 
 
-    /* Student details */
-
     const studentName =
       document
-        .getElementById(
-          "studentName"
-        )
+        .getElementById("studentName")
         .value
         .trim();
 
 
     const grade =
       document
-        .getElementById(
-          "grade"
-        )
+        .getElementById("grade")
         .value;
 
 
     const date =
       document
-        .getElementById(
-          "date"
-        )
+        .getElementById("date")
         .value;
 
 
-    /* ------------------------------------------
-       SEND TO HIDDEN APPS SCRIPT FRAME
-    ------------------------------------------ */
+    status.innerText =
+      "⏳ Sending to Deepgram...";
+
 
     bridgeFrame
       .contentWindow
       .postMessage(
 
         {
-
           type:
             "PROCESS_AUDIO",
 
@@ -915,28 +740,14 @@ async function sendAudioToServer() {
 
       );
 
-
-    status.innerText =
-      "⏳ Sending to Deepgram...";
-
-
   }
 
-  catch (error) {
+  catch(error) {
 
-
-    console.error(
-      "Upload error:",
-      error
-    );
-
-
-    processing = false;
-
+    console.error(error);
 
     status.innerText =
-      "Error sending audio";
-
+      "❌ Error sending audio.";
 
     resultBox.innerText =
       error.message ||
@@ -947,9 +758,7 @@ async function sendAudioToServer() {
 }
 
 
-/* ==================================================
-   DOWNLOAD AUDIO
-================================================== */
+/* DOWNLOAD */
 
 function downloadAudio() {
 
@@ -966,18 +775,14 @@ function downloadAudio() {
 
   const studentName =
     document
-      .getElementById(
-        "studentName"
-      )
+      .getElementById("studentName")
       .value
       .trim();
 
 
   const grade =
     document
-      .getElementById(
-        "grade"
-      )
+      .getElementById("grade")
       .value
       .replace(
         /\s+/g,
@@ -1007,41 +812,24 @@ function downloadAudio() {
 
 
   const link =
-    document.createElement(
-      "a"
-    );
+    document.createElement("a");
 
 
-  link.href =
-    url;
+  link.href = url;
 
-  link.download =
-    filename;
+  link.download = filename;
 
-
-  document
-    .body
-    .appendChild(
-      link
-    );
-
+  document.body.appendChild(link);
 
   link.click();
 
-
-  document
-    .body
-    .removeChild(
-      link
-    );
+  document.body.removeChild(link);
 
 
   setTimeout(
     function() {
 
-      URL.revokeObjectURL(
-        url
-      );
+      URL.revokeObjectURL(url);
 
     },
     1000
@@ -1052,5 +840,4 @@ function downloadAudio() {
 </script>
 
 </body>
-
 </html>
