@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>BOMIS CONVERSATION</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7fb;
+      color: #222;
+    }
+
+    .container {
+      max-width: 850px;
+      margin: 30px auto;
+      background: white;
+      padding: 30px;
+      border-radius: 18px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.10);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 32px;
+    }
+
+    .header p {
+      margin-top: 8px;
+      color: #666;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 7px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 15px;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin: 25px 0;
+      flex-wrap: wrap;
+    }
+
+    button {
+      padding: 13px 24px;
+      border: none;
+      border-radius: 9px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    #startBtn {
+      background: #198754;
+      color: white;
+    }
+
+    #stopBtn {
+      background: #dc3545;
+      color: white;
+    }
+
+    #downloadBtn {
+      background: #0d6efd;
+      color: white;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status {
+      text-align: center;
+      padding: 12px;
+      background: #f1f3f5;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-weight: bold;
+    }
+
+    .timer {
+      text-align: center;
+      font-size: 25px;
+      font-weight: bold;
+      margin: 10px;
+    }
+
+    .conversation-box {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 20px;
+      min-height: 220px;
+      background: #fafafa;
+      white-space: pre-wrap;
+      line-height: 1.7;
+      font-size: 16px;
+    }
+
+    .message {
+      margin-top: 15px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    @media (max-width: 700px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .container {
+        margin: 10px;
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <h1>🎙️ BOMIS CONVERSATION</h1>
+    <p>Student Conversation Recorder & Transcriber</p>
+  </div>
+
+  <div class="form-row">
+
+    <div>
+      <label>Student Name</label>
+      <input
+        type="text"
+        id="studentName"
+        placeholder="Enter student name">
+    </div>
+
+    <div>
+      <label>Grade</label>
+      <select id="grade">
+        <option value="">Select Grade</option>
+        <option>Grade 1</option>
+        <option>Grade 2</option>
+        <option>Grade 3</option>
+        <option>Grade 4</option>
+        <option>Grade 5</option>
+        <option>Grade 6</option>
+        <option>Grade 7</option>
+        <option>Grade 8</option>
+        <option>Grade 9</option>
+        <option>Grade 10</option>
+        <option>Grade 11</option>
+        <option>Grade 12</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Date</label>
+      <input
+        type="date"
+        id="date">
+    </div>
+
+  </div>
+
+  <div class="timer" id="timer">
+    00:00
+  </div>
+
+  <div class="status" id="status">
+    Ready to record
+  </div>
+
+  <div class="buttons">
+
+    <button id="startBtn">
+      🎙️ Start Conversation
+    </button>
+
+    <button id="stopBtn" disabled>
+      ⏹ Stop Conversation
+    </button>
+
+    <button id="downloadBtn" disabled>
+      💾 Download Audio
+    </button>
+
+  </div>
+
+  <div
+    class="conversation-box"
+    id="conversation">
+    Your conversation will appear here after processing.
+  </div>
+
+  <div
+    class="message"
+    id="message">
+  </div>
+
+</div>
+
+
+<script>
+
+const WEB_APP_URL =
+"https://script.google.com/macros/s/AKfycby4QSe_GgfQINvLb_T5Z6BtzoMNa6Qc14vlKSU6XTrfvM2iH1vBE-ugxnW1DAJzgnZ2eg/exec";
+
+
+let mediaRecorder;
+let audioChunks = [];
+let audioBlob = null;
+
+let timerInterval;
+let seconds = 0;
+
+
+// -----------------------------
+// SET TODAY'S DATE
+// -----------------------------
+
+document.getElementById("date").value =
+  new Date().toISOString().split("T")[0];
+
+
+// -----------------------------
+// START RECORDING
+// -----------------------------
+
+document.getElementById("startBtn")
+.addEventListener("click", async function() {
+
+  try {
+
+    const studentName =
+      document.getElementById("studentName").value.trim();
+
+    const grade =
+      document.getElementById("grade").value;
+
+    if (!studentName) {
+      alert("Please enter the student name.");
+      return;
+    }
+
+    if (!grade) {
+      alert("Please select the grade.");
+      return;
+    }
+
+    const stream =
+      await navigator.mediaDevices.getUserMedia({
+        audio: true
+      });
+
+    audioChunks = [];
+
+    mediaRecorder =
+      new MediaRecorder(stream);
+
+    mediaRecorder.ondataavailable =
+      function(event) {
+
+        if (event.data.size > 0) {
+          audioChunks.push(event.data);
+        }
+
+      };
+
+    mediaRecorder.onstop =
+      function() {
+
+        audioBlob =
+          new Blob(
+            audioChunks,
+            { type: "audio/webm" }
+          );
+
+        document.getElementById("downloadBtn")
+          .disabled = false;
+
+        processConversation();
+
+      };
+
+    mediaRecorder.start();
+
+    document.getElementById("startBtn")
+      .disabled = true;
+
+    document.getElementById("stopBtn")
+      .disabled = false;
+
+    document.getElementById("downloadBtn")
+      .disabled = true;
+
+    document.getElementById("conversation")
+      .textContent =
+      "Recording conversation...";
+
+    document.getElementById("status")
+      .textContent =
+      "🔴 Recording...";
+
+    startTimer();
+
+  } catch (error) {
+
+    console.error(error);
+
+    document.getElementById("status")
+      .textContent =
+      "Microphone permission required.";
+
+    alert(
+      "Unable to access the microphone. " +
+      "Please allow microphone permission in Chrome."
+    );
+
+  }
+
+});
+
+
+// -----------------------------
+// STOP RECORDING
+// -----------------------------
+
+document.getElementById("stopBtn")
+.addEventListener("click", function() {
+
+  if (mediaRecorder &&
+      mediaRecorder.state !== "inactive") {
+
+    mediaRecorder.stop();
+
+    mediaRecorder.stream
+      .getTracks()
+      .forEach(track => track.stop());
+
+  }
+
+  document.getElementById("startBtn")
+    .disabled = false;
+
+  document.getElementById("stopBtn")
+    .disabled = true;
+
+  document.getElementById("status")
+    .textContent =
+    "Processing conversation...";
+
+  stopTimer();
+
+});
+
+
+// -----------------------------
+// DOWNLOAD AUDIO
+// -----------------------------
+
+document.getElementById("downloadBtn")
+.addEventListener("click", function() {
+
+  if (!audioBlob) return;
+
+  const studentName =
+    document.getElementById("studentName")
+      .value.trim()
+      .replace(/[^a-z0-9]/gi, "_");
+
+  const grade =
+    document.getElementById("grade").value
+      .replace(/\s/g, "_");
+
+  const url =
+    URL.createObjectURL(audioBlob);
+
+  const link =
+    document.createElement("a");
+
+  link.href = url;
+
+  link.download =
+    studentName +
+    "_" +
+    grade +
+    "_conversation.webm";
+
+  link.click();
+
+  URL.revokeObjectURL(url);
+
+});
+
+
+// -----------------------------
+// SEND AUDIO TO APPS SCRIPT
+// -----------------------------
+
+async function processConversation() {
+
+  try {
+
+    document.getElementById("status")
+      .textContent =
+      "⏳ Sending conversation to Deepgram...";
+
+    const studentName =
+      document.getElementById("studentName").value;
+
+    const grade =
+      document.getElementById("grade").value;
+
+    const date =
+      document.getElementById("date").value;
+
+
+    const url =
+      WEB_APP_URL +
+      "?studentName=" +
+      encodeURIComponent(studentName) +
+      "&grade=" +
+      encodeURIComponent(grade) +
+      "&date=" +
+      encodeURIComponent(date);
+
+
+    const response =
+      await fetch(
+        url,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "audio/webm"
+          },
+          body: audioBlob
+        }
+      );
+
+
+    const result =
+      await response.json();
+
+
+    if (!result.success) {
+
+      throw new Error(
+        result.error ||
+        "Unknown server error"
+      );
+
+    }
+
+
+    document.getElementById("conversation")
+      .textContent =
+      result.transcript ||
+      "No conversation detected.";
+
+
+    document.getElementById("status")
+      .textContent =
+      "✅ Conversation saved successfully";
+
+
+    document.getElementById("message")
+      .textContent =
+      "The conversation has been saved to Google Sheets.";
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    document.getElementById("status")
+      .textContent =
+      "❌ Error processing conversation";
+
+    document.getElementById("message")
+      .textContent =
+      error.message;
+
+  }
+
+}
+
+
+// -----------------------------
+// TIMER
+// -----------------------------
+
+function startTimer() {
+
+  seconds = 0;
+
+  updateTimer();
+
+  timerInterval =
+    setInterval(function() {
+
+      seconds++;
+
+      updateTimer();
+
+    }, 1000);
+
+}
+
+
+function stopTimer() {
+
+  clearInterval(timerInterval);
+
+}
+
+
+function updateTimer() {
+
+  const minutes =
+    Math.floor(seconds / 60)
+      .toString()
+      .padStart(2, "0");
+
+  const secs =
+    (seconds % 60)
+      .toString()
+      .padStart(2, "0");
+
+  document.getElementById("timer")
+    .textContent =
+    minutes + ":" + secs;
+
+}
+
+</script>
+
+</body>
+</html>
