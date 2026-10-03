@@ -1,302 +1,436 @@
 <!DOCTYPE html>
-<html lang="en">
+
+<html>
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>BOMIS CONVERSATION</title>
+<meta charset="UTF-8">
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f7fb;
-      color: #222;
-    }
+<title>BOMIS CONVERSATION</title>
 
-    .container {
-      max-width: 850px;
-      margin: 30px auto;
-      background: white;
-      padding: 30px;
-      border-radius: 18px;
-      box-shadow: 0 5px 25px rgba(0,0,0,0.10);
-    }
+<style>
 
-    .header {
-      text-align: center;
-      margin-bottom: 25px;
-    }
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f7fb;
+  margin: 0;
+  padding: 20px;
+}
 
-    .header h1 {
-      margin: 0;
-      font-size: 32px;
-    }
+.container {
+  max-width: 700px;
+  margin: auto;
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
 
-    .header p {
-      margin-top: 8px;
-      color: #666;
-    }
+h1 {
+  text-align: center;
+  color: #1d3557;
+}
 
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 15px;
-      margin-bottom: 20px;
-    }
+.subtitle {
+  text-align: center;
+  color: #666;
+  margin-bottom: 25px;
+}
 
-    label {
-      font-weight: bold;
-      display: block;
-      margin-bottom: 7px;
-    }
+label {
+  display: block;
+  margin-top: 15px;
+  font-weight: bold;
+}
 
-    input,
-    select {
-      width: 100%;
-      padding: 12px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 15px;
-    }
+input,
+select {
+  width: 100%;
+  padding: 12px;
+  margin-top: 6px;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 16px;
+}
 
-    .buttons {
-      display: flex;
-      justify-content: center;
-      gap: 15px;
-      margin: 25px 0;
-      flex-wrap: wrap;
-    }
+button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 17px;
+  cursor: pointer;
+}
 
-    button {
-      padding: 13px 24px;
-      border: none;
-      border-radius: 9px;
-      font-size: 16px;
-      cursor: pointer;
-      font-weight: bold;
-    }
+#startBtn {
+  background: #2a9d8f;
+  color: white;
+}
 
-    #startBtn {
-      background: #198754;
-      color: white;
-    }
+#stopBtn {
+  background: #e76f51;
+  color: white;
+}
 
-    #stopBtn {
-      background: #dc3545;
-      color: white;
-    }
+#downloadBtn {
+  background: #457b9d;
+  color: white;
+}
 
-    #downloadBtn {
-      background: #0d6efd;
-      color: white;
-    }
+button:disabled {
+  background: #bbb !important;
+  cursor: not-allowed;
+}
 
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+.status {
+  margin-top: 20px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #eef3f8;
+  text-align: center;
+}
 
-    .status {
-      text-align: center;
-      padding: 12px;
-      background: #f1f3f5;
-      border-radius: 8px;
-      margin-bottom: 20px;
-      font-weight: bold;
-    }
+.timer {
+  text-align: center;
+  font-size: 30px;
+  margin-top: 15px;
+  font-weight: bold;
+}
 
-    .timer {
-      text-align: center;
-      font-size: 25px;
-      font-weight: bold;
-      margin: 10px;
-    }
+.result {
+  margin-top: 20px;
+  padding: 15px;
+  background: #f7f7f7;
+  border-radius: 10px;
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
 
-    .conversation-box {
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      padding: 20px;
-      min-height: 220px;
-      background: #fafafa;
-      white-space: pre-wrap;
-      line-height: 1.7;
-      font-size: 16px;
-    }
+iframe {
+  display: none;
+}
 
-    .message {
-      margin-top: 15px;
-      text-align: center;
-      font-weight: bold;
-    }
+</style>
 
-    @media (max-width: 700px) {
-      .form-row {
-        grid-template-columns: 1fr;
-      }
-
-      .container {
-        margin: 10px;
-        padding: 20px;
-      }
-    }
-  </style>
 </head>
+
 
 <body>
 
+
 <div class="container">
 
-  <div class="header">
-    <h1>🎙️ BOMIS CONVERSATION</h1>
-    <p>Student Conversation Recorder & Transcriber</p>
-  </div>
+<h1>🎤 BOMIS CONVERSATION</h1>
 
-  <div class="form-row">
+<div class="subtitle">
+Student Conversation Recorder
+</div>
 
-    <div>
-      <label>Student Name</label>
-      <input
-        type="text"
-        id="studentName"
-        placeholder="Enter student name">
-    </div>
 
-    <div>
-      <label>Grade</label>
-      <select id="grade">
-        <option value="">Select Grade</option>
-        <option>Grade 1</option>
-        <option>Grade 2</option>
-        <option>Grade 3</option>
-        <option>Grade 4</option>
-        <option>Grade 5</option>
-        <option>Grade 6</option>
-        <option>Grade 7</option>
-        <option>Grade 8</option>
-        <option>Grade 9</option>
-        <option>Grade 10</option>
-        <option>Grade 11</option>
-        <option>Grade 12</option>
-      </select>
-    </div>
+<label>Student Name</label>
 
-    <div>
-      <label>Date</label>
-      <input
-        type="date"
-        id="date">
-    </div>
+<input
+  type="text"
+  id="studentName"
+  placeholder="Enter student name"
+>
 
-  </div>
 
-  <div class="timer" id="timer">
-    00:00
-  </div>
+<label>Grade</label>
 
-  <div class="status" id="status">
-    Ready to record
-  </div>
+<select id="grade">
 
-  <div class="buttons">
+<option value="">Select Grade</option>
 
-    <button id="startBtn">
-      🎙️ Start Conversation
-    </button>
+<option>Grade 1</option>
+<option>Grade 2</option>
+<option>Grade 3</option>
+<option>Grade 4</option>
+<option>Grade 5</option>
+<option>Grade 6</option>
+<option>Grade 7</option>
+<option>Grade 8</option>
+<option>Grade 9</option>
+<option>Grade 10</option>
+<option>Grade 11</option>
+<option>Grade 12</option>
 
-    <button id="stopBtn" disabled>
-      ⏹ Stop Conversation
-    </button>
+</select>
 
-    <button id="downloadBtn" disabled>
-      💾 Download Audio
-    </button>
 
-  </div>
+<label>Date</label>
 
-  <div
-    class="conversation-box"
-    id="conversation">
-    Your conversation will appear here after processing.
-  </div>
+<input
+  type="date"
+  id="date"
+>
 
-  <div
-    class="message"
-    id="message">
-  </div>
+
+<div class="timer" id="timer">
+00:00
+</div>
+
+
+<button
+  id="startBtn"
+  onclick="startRecording()"
+  disabled
+>
+Start Conversation
+</button>
+
+
+<button
+  id="stopBtn"
+  onclick="stopRecording()"
+  disabled
+>
+Stop Conversation
+</button>
+
+
+<button
+  id="downloadBtn"
+  onclick="downloadAudio()"
+  disabled
+>
+Download Audio
+</button>
+
+
+<div
+  class="status"
+  id="status"
+>
+Connecting to BOMIS...
+</div>
+
+
+<div
+  class="result"
+  id="result"
+>
+Conversation will appear here.
+</div>
 
 </div>
 
 
+<!--
+Hidden Apps Script bridge.
+GitHub remains the visible application.
+-->
+
+<iframe
+  id="bridgeFrame"
+  src="https://script.google.com/macros/s/AKfycby4QSe_GgfQINvLb_T5Z6BtzoMNa6Qc14vlKSU6XTrfvM2iH1vBE-ugxnW1DAJzgnZ2eg/exec"
+></iframe>
+
+
 <script>
 
-const WEB_APP_URL =
-"https://script.google.com/macros/s/AKfycby4QSe_GgfQINvLb_T5Z6BtzoMNa6Qc14vlKSU6XTrfvM2iH1vBE-ugxnW1DAJzgnZ2eg/exec";
 
+let mediaRecorder = null;
 
-let mediaRecorder;
 let audioChunks = [];
+
 let audioBlob = null;
 
-let timerInterval;
+let timerInterval = null;
+
 let seconds = 0;
 
+let bridgeReady = false;
 
-// -----------------------------
-// SET TODAY'S DATE
-// -----------------------------
+let isProcessing = false;
 
-document.getElementById("date").value =
+
+const bridgeFrame =
+  document.getElementById("bridgeFrame");
+
+
+const startBtn =
+  document.getElementById("startBtn");
+
+
+const stopBtn =
+  document.getElementById("stopBtn");
+
+
+const downloadBtn =
+  document.getElementById("downloadBtn");
+
+
+const status =
+  document.getElementById("status");
+
+
+const resultBox =
+  document.getElementById("result");
+
+
+const timer =
+  document.getElementById("timer");
+
+
+const dateInput =
+  document.getElementById("date");
+
+
+// Today's date
+dateInput.value =
   new Date().toISOString().split("T")[0];
 
 
-// -----------------------------
-// START RECORDING
-// -----------------------------
+// Listen for Apps Script bridge messages
+window.addEventListener(
+  "message",
+  function(event) {
 
-document.getElementById("startBtn")
-.addEventListener("click", async function() {
+    const data = event.data;
+
+    if (!data || !data.type) {
+      return;
+    }
+
+
+    // Bridge is ready
+    if (data.type === "BOMIS_BRIDGE_READY") {
+
+      bridgeReady = true;
+
+      status.innerText =
+        "Ready to record";
+
+      startBtn.disabled = false;
+
+      return;
+    }
+
+
+    // Result from Apps Script
+    if (data.type === "BOMIS_RESULT") {
+
+      isProcessing = false;
+
+      const response = data.result;
+
+
+      if (response && response.success) {
+
+        status.innerText =
+          "Conversation saved successfully.";
+
+        resultBox.innerText =
+          response.transcript ||
+          "No conversation detected.";
+
+      }
+
+      else {
+
+        status.innerText =
+          "Error processing conversation.";
+
+        resultBox.innerText =
+          response && response.error
+            ? response.error
+            : "Unknown error.";
+
+      }
+
+    }
+
+  }
+);
+
+
+// Start recording
+async function startRecording() {
+
+  const studentName =
+    document.getElementById("studentName")
+      .value.trim();
+
+  const grade =
+    document.getElementById("grade")
+      .value;
+
+
+  if (!studentName) {
+
+    alert("Please enter the student name.");
+
+    return;
+  }
+
+
+  if (!grade) {
+
+    alert("Please select the grade.");
+
+    return;
+  }
+
+
+  if (!bridgeReady) {
+
+    alert("Please wait. Connecting to server...");
+
+    return;
+  }
+
 
   try {
 
-    const studentName =
-      document.getElementById("studentName").value.trim();
-
-    const grade =
-      document.getElementById("grade").value;
-
-    if (!studentName) {
-      alert("Please enter the student name.");
-      return;
-    }
-
-    if (!grade) {
-      alert("Please select the grade.");
-      return;
-    }
-
     const stream =
-      await navigator.mediaDevices.getUserMedia({
-        audio: true
-      });
+      await navigator.mediaDevices
+        .getUserMedia({
+          audio: true
+        });
+
 
     audioChunks = [];
 
+
+    let options = {};
+
+
+    if (
+      MediaRecorder.isTypeSupported(
+        "audio/webm;codecs=opus"
+      )
+    ) {
+
+      options.mimeType =
+        "audio/webm;codecs=opus";
+
+    }
+
+
     mediaRecorder =
-      new MediaRecorder(stream);
+      new MediaRecorder(
+        stream,
+        options
+      );
+
 
     mediaRecorder.ondataavailable =
       function(event) {
 
         if (event.data.size > 0) {
+
           audioChunks.push(event.data);
+
         }
 
       };
+
 
     mediaRecorder.onstop =
       function() {
@@ -304,200 +438,47 @@ document.getElementById("startBtn")
         audioBlob =
           new Blob(
             audioChunks,
-            { type: "audio/webm" }
+            {
+              type:
+                mediaRecorder.mimeType ||
+                "audio/webm"
+            }
           );
 
-        document.getElementById("downloadBtn")
-          .disabled = false;
 
-        processConversation();
+        downloadBtn.disabled = false;
+
+        sendAudioToServer();
 
       };
 
+
     mediaRecorder.start();
 
-    document.getElementById("startBtn")
-      .disabled = true;
 
-    document.getElementById("stopBtn")
-      .disabled = false;
+    seconds = 0;
 
-    document.getElementById("downloadBtn")
-      .disabled = true;
+    updateTimer();
 
-    document.getElementById("conversation")
-      .textContent =
+
+    timerInterval =
+      setInterval(
+        updateTimer,
+        1000
+      );
+
+
+    startBtn.disabled = true;
+
+    stopBtn.disabled = false;
+
+    downloadBtn.disabled = true;
+
+    status.innerText =
       "Recording conversation...";
 
-    document.getElementById("status")
-      .textContent =
-      "🔴 Recording...";
+    resultBox.innerText = "";
 
-    startTimer();
-
-  } catch (error) {
-
-    console.error(error);
-
-    document.getElementById("status")
-      .textContent =
-      "Microphone permission required.";
-
-    alert(
-      "Unable to access the microphone. " +
-      "Please allow microphone permission in Chrome."
-    );
-
-  }
-
-});
-
-
-// -----------------------------
-// STOP RECORDING
-// -----------------------------
-
-document.getElementById("stopBtn")
-.addEventListener("click", function() {
-
-  if (mediaRecorder &&
-      mediaRecorder.state !== "inactive") {
-
-    mediaRecorder.stop();
-
-    mediaRecorder.stream
-      .getTracks()
-      .forEach(track => track.stop());
-
-  }
-
-  document.getElementById("startBtn")
-    .disabled = false;
-
-  document.getElementById("stopBtn")
-    .disabled = true;
-
-  document.getElementById("status")
-    .textContent =
-    "Processing conversation...";
-
-  stopTimer();
-
-});
-
-
-// -----------------------------
-// DOWNLOAD AUDIO
-// -----------------------------
-
-document.getElementById("downloadBtn")
-.addEventListener("click", function() {
-
-  if (!audioBlob) return;
-
-  const studentName =
-    document.getElementById("studentName")
-      .value.trim()
-      .replace(/[^a-z0-9]/gi, "_");
-
-  const grade =
-    document.getElementById("grade").value
-      .replace(/\s/g, "_");
-
-  const url =
-    URL.createObjectURL(audioBlob);
-
-  const link =
-    document.createElement("a");
-
-  link.href = url;
-
-  link.download =
-    studentName +
-    "_" +
-    grade +
-    "_conversation.webm";
-
-  link.click();
-
-  URL.revokeObjectURL(url);
-
-});
-
-
-// -----------------------------
-// SEND AUDIO TO APPS SCRIPT
-// -----------------------------
-
-async function processConversation() {
-
-  try {
-
-    document.getElementById("status")
-      .textContent =
-      "⏳ Sending conversation to Deepgram...";
-
-    const studentName =
-      document.getElementById("studentName").value;
-
-    const grade =
-      document.getElementById("grade").value;
-
-    const date =
-      document.getElementById("date").value;
-
-
-    const url =
-      WEB_APP_URL +
-      "?studentName=" +
-      encodeURIComponent(studentName) +
-      "&grade=" +
-      encodeURIComponent(grade) +
-      "&date=" +
-      encodeURIComponent(date);
-
-
-    const response =
-      await fetch(
-        url,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "audio/webm"
-          },
-          body: audioBlob
-        }
-      );
-
-
-    const result =
-      await response.json();
-
-
-    if (!result.success) {
-
-      throw new Error(
-        result.error ||
-        "Unknown server error"
-      );
-
-    }
-
-
-    document.getElementById("conversation")
-      .textContent =
-      result.transcript ||
-      "No conversation detected.";
-
-
-    document.getElementById("status")
-      .textContent =
-      "✅ Conversation saved successfully";
-
-
-    document.getElementById("message")
-      .textContent =
-      "The conversation has been saved to Google Sheets.";
 
   }
 
@@ -505,12 +486,208 @@ async function processConversation() {
 
     console.error(error);
 
-    document.getElementById("status")
-      .textContent =
-      "❌ Error processing conversation";
+    status.innerText =
+      "Microphone permission failed.";
 
-    document.getElementById("message")
-      .textContent =
+    alert(
+      "Please allow microphone access in Chrome."
+    );
+
+  }
+
+}
+
+
+// Stop recording
+function stopRecording() {
+
+  if (!mediaRecorder) {
+    return;
+  }
+
+
+  mediaRecorder.stop();
+
+
+  if (mediaRecorder.stream) {
+
+    mediaRecorder.stream
+      .getTracks()
+      .forEach(
+        track => track.stop()
+      );
+
+  }
+
+
+  clearInterval(timerInterval);
+
+
+  stopBtn.disabled = true;
+
+  startBtn.disabled = false;
+
+  status.innerText =
+    "Processing conversation...";
+
+}
+
+
+// Timer
+function updateTimer() {
+
+  seconds++;
+
+
+  const mins =
+    Math.floor(seconds / 60)
+      .toString()
+      .padStart(2, "0");
+
+
+  const secs =
+    (seconds % 60)
+      .toString()
+      .padStart(2, "0");
+
+
+  timer.innerText =
+    mins + ":" + secs;
+
+}
+
+
+// Convert Blob to Base64
+function blobToBase64(blob) {
+
+  return new Promise(
+    function(resolve, reject) {
+
+      const reader =
+        new FileReader();
+
+
+      reader.onloadend =
+        function() {
+
+          const dataUrl =
+            reader.result;
+
+
+          const base64 =
+            dataUrl.split(",")[1];
+
+
+          resolve(base64);
+
+        };
+
+
+      reader.onerror =
+        reject;
+
+
+      reader.readAsDataURL(blob);
+
+    }
+  );
+
+}
+
+
+// Send recording to Apps Script
+async function sendAudioToServer() {
+
+  if (!audioBlob) {
+    return;
+  }
+
+
+  if (!bridgeReady) {
+
+    status.innerText =
+      "Server bridge is not ready.";
+
+    return;
+  }
+
+
+  isProcessing = true;
+
+
+  try {
+
+    const base64 =
+      await blobToBase64(
+        audioBlob
+      );
+
+
+    const studentName =
+      document.getElementById(
+        "studentName"
+      ).value.trim();
+
+
+    const grade =
+      document.getElementById(
+        "grade"
+      ).value;
+
+
+    const date =
+      document.getElementById(
+        "date"
+      ).value;
+
+
+    const bridgeWindow =
+      bridgeFrame.contentWindow;
+
+
+    bridgeWindow.postMessage(
+
+      {
+        type:
+          "PROCESS_AUDIO",
+
+        base64:
+          base64,
+
+        mimeType:
+          audioBlob.type ||
+          "audio/webm",
+
+        studentName:
+          studentName,
+
+        grade:
+          grade,
+
+        date:
+          date
+      },
+
+      "*"
+
+    );
+
+
+    status.innerText =
+      "Sending audio for transcription...";
+
+  }
+
+  catch (error) {
+
+    console.error(error);
+
+    isProcessing = false;
+
+    status.innerText =
+      "Error sending audio.";
+
+    resultBox.innerText =
       error.message;
 
   }
@@ -518,54 +695,62 @@ async function processConversation() {
 }
 
 
-// -----------------------------
-// TIMER
-// -----------------------------
+// Download audio
+function downloadAudio() {
 
-function startTimer() {
-
-  seconds = 0;
-
-  updateTimer();
-
-  timerInterval =
-    setInterval(function() {
-
-      seconds++;
-
-      updateTimer();
-
-    }, 1000);
-
-}
+  if (!audioBlob) {
+    return;
+  }
 
 
-function stopTimer() {
+  const studentName =
+    document.getElementById(
+      "studentName"
+    ).value.trim();
 
-  clearInterval(timerInterval);
 
-}
+  const grade =
+    document.getElementById(
+      "grade"
+    ).value
+      .replace(/\s+/g, "_");
 
 
-function updateTimer() {
+  const safeName =
+    studentName
+      .replace(/[^a-z0-9]/gi, "_");
 
-  const minutes =
-    Math.floor(seconds / 60)
-      .toString()
-      .padStart(2, "0");
 
-  const secs =
-    (seconds % 60)
-      .toString()
-      .padStart(2, "0");
+  const filename =
+    safeName +
+    "_" +
+    grade +
+    "_Conversation.webm";
 
-  document.getElementById("timer")
-    .textContent =
-    minutes + ":" + secs;
+
+  const url =
+    URL.createObjectURL(
+      audioBlob
+    );
+
+
+  const a =
+    document.createElement("a");
+
+
+  a.href = url;
+
+  a.download = filename;
+
+  a.click();
+
+
+  URL.revokeObjectURL(url);
 
 }
 
 </script>
 
 </body>
+
 </html>
