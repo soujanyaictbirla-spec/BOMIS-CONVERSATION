@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
   <meta charset="UTF-8">
 
   <meta
@@ -10,10 +11,13 @@
 
   <title>BOMIS Conversation</title>
 
+
   <style>
+
     * {
       box-sizing: border-box;
     }
+
 
     body {
       margin: 0;
@@ -22,6 +26,7 @@
       font-family: Arial, Helvetica, sans-serif;
       color: #222;
     }
+
 
     .container {
       width: 100%;
@@ -33,17 +38,20 @@
       box-shadow: 0 5px 25px rgba(0,0,0,0.08);
     }
 
+
     h1 {
       text-align: center;
       margin: 0 0 8px;
       font-size: 30px;
     }
 
+
     .subtitle {
       text-align: center;
       color: #666;
       margin-bottom: 30px;
     }
+
 
     .form-row {
       display: grid;
@@ -52,11 +60,13 @@
       margin-bottom: 20px;
     }
 
+
     label {
       display: block;
       font-weight: bold;
       margin-bottom: 7px;
     }
+
 
     input,
     select {
@@ -68,10 +78,12 @@
       outline: none;
     }
 
+
     input:focus,
     select:focus {
       border-color: #4285f4;
     }
+
 
     .buttons {
       display: flex;
@@ -79,6 +91,7 @@
       gap: 12px;
       margin: 25px 0 15px;
     }
+
 
     button {
       border: none;
@@ -89,28 +102,34 @@
       cursor: pointer;
     }
 
+
     #startBtn {
       background: #1b9e5a;
       color: white;
     }
 
+
     #startBtn:hover {
       background: #16884d;
     }
+
 
     #stopBtn {
       background: #d93025;
       color: white;
     }
 
+
     #stopBtn:hover {
       background: #b9251c;
     }
+
 
     button:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
+
 
     .timer {
       text-align: center;
@@ -118,6 +137,7 @@
       font-weight: bold;
       margin: 15px 0;
     }
+
 
     .status {
       text-align: center;
@@ -128,11 +148,13 @@
       font-weight: bold;
     }
 
+
     .conversation-title {
       font-size: 19px;
       font-weight: bold;
       margin-bottom: 10px;
     }
+
 
     #conversationBox {
       min-height: 220px;
@@ -146,10 +168,12 @@
       line-height: 1.6;
     }
 
+
     .download-area {
       text-align: center;
       margin-top: 20px;
     }
+
 
     #downloadLink {
       display: none;
@@ -160,6 +184,7 @@
       border-radius: 8px;
       font-weight: bold;
     }
+
 
     @media (max-width: 600px) {
 
@@ -180,20 +205,32 @@
       }
 
     }
+
   </style>
+
 </head>
+
 
 <body>
 
+
 <div class="container">
 
+
   <h1>BOMIS Conversation</h1>
+
 
   <div class="subtitle">
     Student Conversation Recorder
   </div>
 
+
+  <!-- =========================================
+       STUDENT DETAILS
+       ========================================= -->
+
   <div class="form-row">
+
 
     <div>
 
@@ -208,6 +245,7 @@
       >
 
     </div>
+
 
     <div>
 
@@ -238,10 +276,16 @@
 
     </div>
 
+
   </div>
 
 
+  <!-- =========================================
+       BUTTONS
+       ========================================= -->
+
   <div class="buttons">
+
 
     <button
       id="startBtn"
@@ -249,6 +293,7 @@
     >
       🎙️ Start Recording
     </button>
+
 
     <button
       id="stopBtn"
@@ -258,8 +303,13 @@
       ⏹ Stop
     </button>
 
+
   </div>
 
+
+  <!-- =========================================
+       TIMER
+       ========================================= -->
 
   <div
     class="timer"
@@ -269,6 +319,10 @@
   </div>
 
 
+  <!-- =========================================
+       STATUS
+       ========================================= -->
+
   <div
     class="status"
     id="status"
@@ -276,6 +330,10 @@
     Ready to record
   </div>
 
+
+  <!-- =========================================
+       CONVERSATION
+       ========================================= -->
 
   <div class="conversation-title">
     Conversation
@@ -286,6 +344,10 @@
     Your conversation will appear here after processing.
   </div>
 
+
+  <!-- =========================================
+       DOWNLOAD
+       ========================================= -->
 
   <div class="download-area">
 
@@ -298,14 +360,16 @@
 
   </div>
 
+
 </div>
+
 
 
 <script>
 
 
 /* =========================================================
-   SUPABASE EDGE FUNCTION
+   SUPABASE EDGE FUNCTION URL
    ========================================================= */
 
 const SUPABASE_FUNCTION_URL =
@@ -342,29 +406,35 @@ let audioBlob = null;
 const startBtn =
   document.getElementById("startBtn");
 
+
 const stopBtn =
   document.getElementById("stopBtn");
+
 
 const timer =
   document.getElementById("timer");
 
+
 const status =
   document.getElementById("status");
 
+
 const conversationBox =
   document.getElementById("conversationBox");
+
 
 const downloadLink =
   document.getElementById("downloadLink");
 
 
 /* =========================================================
-   STATUS
+   STATUS FUNCTION
    ========================================================= */
 
 function setStatus(message) {
 
-  status.textContent = message;
+  status.textContent =
+    message;
 
   console.log(
     "STATUS:",
@@ -382,6 +452,11 @@ async function startRecording() {
 
   try {
 
+
+    /* ================================================
+       GET STUDENT NAME
+       ================================================ */
+
     const studentName =
       document
         .getElementById("studentName")
@@ -389,11 +464,19 @@ async function startRecording() {
         .trim();
 
 
+    /* ================================================
+       GET GRADE
+       ================================================ */
+
     const grade =
       document
         .getElementById("grade")
         .value;
 
+
+    /* ================================================
+       VALIDATE STUDENT NAME
+       ================================================ */
 
     if (!studentName) {
 
@@ -406,6 +489,10 @@ async function startRecording() {
     }
 
 
+    /* ================================================
+       VALIDATE GRADE
+       ================================================ */
+
     if (!grade) {
 
       alert(
@@ -416,6 +503,10 @@ async function startRecording() {
 
     }
 
+
+    /* ================================================
+       RESET DISPLAY
+       ================================================ */
 
     conversationBox.textContent =
       "Recording conversation...";
@@ -430,9 +521,21 @@ async function startRecording() {
     );
 
 
-    /* =====================================================
-       REQUEST MICROPHONE
-       ===================================================== */
+    /* ================================================
+       MICROPHONE
+       ================================================ */
+
+    if (
+      !navigator.mediaDevices ||
+      !navigator.mediaDevices.getUserMedia
+    ) {
+
+      throw new Error(
+        "This browser does not support microphone access."
+      );
+
+    }
+
 
     const stream =
       await navigator
@@ -442,12 +545,21 @@ async function startRecording() {
         });
 
 
+    console.log(
+      "Microphone permission granted."
+    );
+
+
+    /* ================================================
+       RESET AUDIO
+       ================================================ */
+
     audioChunks = [];
 
 
-    /* =====================================================
+    /* ================================================
        AUDIO FORMAT
-       ===================================================== */
+       ================================================ */
 
     let options = {};
 
@@ -475,9 +587,15 @@ async function startRecording() {
     }
 
 
-    /* =====================================================
-       MEDIA RECORDER
-       ===================================================== */
+    console.log(
+      "Recorder MIME:",
+      options.mimeType || "browser default"
+    );
+
+
+    /* ================================================
+       CREATE MEDIA RECORDER
+       ================================================ */
 
     mediaRecorder =
       new MediaRecorder(
@@ -486,9 +604,9 @@ async function startRecording() {
       );
 
 
-    /* =====================================================
-       COLLECT AUDIO
-       ===================================================== */
+    /* ================================================
+       AUDIO DATA
+       ================================================ */
 
     mediaRecorder.ondataavailable =
       function(event) {
@@ -507,12 +625,18 @@ async function startRecording() {
       };
 
 
-    /* =====================================================
-       WHEN RECORDING STOPS
-       ===================================================== */
+    /* ================================================
+       RECORDING STOP
+       ================================================ */
 
     mediaRecorder.onstop =
       function() {
+
+
+        console.log(
+          "Recording stopped."
+        );
+
 
         audioBlob =
           new Blob(
@@ -542,8 +666,9 @@ async function startRecording() {
         stream
           .getTracks()
           .forEach(
-            track =>
-              track.stop()
+            function(track) {
+              track.stop();
+            }
           );
 
 
@@ -552,9 +677,9 @@ async function startRecording() {
       };
 
 
-    /* =====================================================
-       START
-       ===================================================== */
+    /* ================================================
+       START RECORDER
+       ================================================ */
 
     mediaRecorder.start();
 
@@ -587,10 +712,11 @@ async function startRecording() {
       "Recording started."
     );
 
+
   }
 
-
   catch (error) {
+
 
     console.error(
       "Microphone error:",
@@ -599,8 +725,7 @@ async function startRecording() {
 
 
     setStatus(
-      "Microphone error: " +
-      error.message
+      "Microphone error"
     );
 
 
@@ -620,6 +745,7 @@ async function startRecording() {
 
 function stopRecording() {
 
+
   if (
     !mediaRecorder ||
     mediaRecorder.state === "inactive"
@@ -632,6 +758,11 @@ function stopRecording() {
 
   console.log(
     "Stopping recording..."
+  );
+
+
+  setStatus(
+    "Preparing recording..."
   );
 
 
@@ -650,11 +781,6 @@ function stopRecording() {
   stopBtn.disabled =
     true;
 
-
-  setStatus(
-    "Preparing recording..."
-  );
-
 }
 
 
@@ -663,6 +789,7 @@ function stopRecording() {
    ========================================================= */
 
 function updateTimer() {
+
 
   if (!recordingStartTime) {
 
@@ -708,6 +835,11 @@ async function uploadAudio() {
 
   try {
 
+
+    /* ================================================
+       CHECK AUDIO
+       ================================================ */
+
     if (
       !audioBlob ||
       audioBlob.size === 0
@@ -726,12 +858,12 @@ async function uploadAudio() {
 
 
     conversationBox.textContent =
-      "Sending audio to Deepgram...";
+      "Sending audio to Supabase...";
 
 
-    /* =====================================================
+    /* ================================================
        STUDENT DETAILS
-       ===================================================== */
+       ================================================ */
 
     const studentName =
       document
@@ -746,9 +878,9 @@ async function uploadAudio() {
         .value;
 
 
-    /* =====================================================
+    /* ================================================
        DATE
-       ===================================================== */
+       ================================================ */
 
     const today =
       new Date();
@@ -761,7 +893,8 @@ async function uploadAudio() {
     const month =
       String(
         today.getMonth() + 1
-      ).padStart(
+      )
+      .padStart(
         2,
         "0"
       );
@@ -770,7 +903,8 @@ async function uploadAudio() {
     const day =
       String(
         today.getDate()
-      ).padStart(
+      )
+      .padStart(
         2,
         "0"
       );
@@ -780,9 +914,9 @@ async function uploadAudio() {
       `${year}-${month}-${day}`;
 
 
-    /* =====================================================
+    /* ================================================
        FORM DATA
-       ===================================================== */
+       ================================================ */
 
     const formData =
       new FormData();
@@ -814,62 +948,97 @@ async function uploadAudio() {
 
 
     console.log(
-      "Sending audio to Supabase..."
+      "===================================="
     );
 
 
     console.log(
-      "Function URL:",
-      SUPABASE_FUNCTION_URL
+      "BOMIS AUDIO UPLOAD STARTED"
     );
 
 
-    /* =====================================================
+    console.log(
+      "Student:",
+      studentName
+    );
+
+
+    console.log(
+      "Grade:",
+      grade
+    );
+
+
+    console.log(
+      "Date:",
+      date
+    );
+
+
+    console.log(
+      "Audio size:",
+      audioBlob.size
+    );
+
+
+    console.log(
+      "Audio type:",
+      audioBlob.type
+    );
+
+
+    /* ================================================
        SEND TO SUPABASE
-       
-       IMPORTANT:
-       Authorization header added here.
-       ===================================================== */
+       ================================================ */
 
     const response =
       await fetch(
         SUPABASE_FUNCTION_URL,
         {
+
           method: "POST",
 
           headers: {
 
             "Authorization":
               "Bearer " +
+              SUPABASE_ANON_KEY,
+
+            "apikey":
               SUPABASE_ANON_KEY
 
           },
 
-          body: formData
+          body:
+            formData
 
         }
       );
 
 
-    /* =====================================================
+    /* ================================================
        READ RESPONSE
-       ===================================================== */
+       ================================================ */
 
     const responseText =
       await response.text();
 
 
     console.log(
-      "Supabase HTTP status:",
+      "SUPABASE HTTP STATUS:",
       response.status
     );
 
 
     console.log(
-      "Supabase response:",
+      "SUPABASE RESPONSE:",
       responseText
     );
 
+
+    /* ================================================
+       PARSE JSON
+       ================================================ */
 
     let result;
 
@@ -883,44 +1052,84 @@ async function uploadAudio() {
 
     }
 
-    catch (error) {
+    catch (jsonError) {
 
       throw new Error(
-        "Invalid response from Supabase:\n" +
+
+        "Supabase returned an invalid response.\n\n" +
+
+        "HTTP Status: " +
+        response.status +
+
+        "\n\nResponse:\n" +
+
         responseText
+
       );
 
     }
 
 
-    /* =====================================================
-       ERROR
-       ===================================================== */
+    /* ================================================
+       HTTP ERROR
+       ================================================ */
 
     if (!response.ok) {
 
-      throw new Error(
+      const realError =
         result.error ||
         result.message ||
-        "Supabase processing failed."
+        result.msg ||
+        "Unknown Supabase error";
+
+
+      throw new Error(
+
+        "Supabase Error " +
+        response.status +
+        "\n\n" +
+
+        realError
+
       );
 
     }
 
+
+    /* ================================================
+       FUNCTION ERROR
+       ================================================ */
 
     if (!result.success) {
 
       throw new Error(
+
         result.error ||
         "Conversation processing failed."
+
       );
 
     }
 
 
-    /* =====================================================
-       SHOW TRANSCRIPT
-       ===================================================== */
+    /* ================================================
+       SUCCESS
+       ================================================ */
+
+    console.log(
+      "===================================="
+    );
+
+
+    console.log(
+      "BOMIS CONVERSATION SUCCESS"
+    );
+
+
+    console.log(
+      result
+    );
+
 
     showTranscript(
       result.conversation
@@ -932,35 +1141,49 @@ async function uploadAudio() {
     );
 
 
-    console.log(
-      "Conversation successfully processed."
-    );
-
-
   }
 
 
   catch (error) {
 
+
     console.error(
-      "Processing error:",
+      "===================================="
+    );
+
+
+    console.error(
+      "BOMIS PROCESSING ERROR"
+    );
+
+
+    console.error(
       error
     );
 
 
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : String(error);
+
+
     setStatus(
-      "❌ Error processing conversation"
+      "❌ Processing failed"
     );
 
 
     conversationBox.textContent =
-      "Error:\n\n" +
-      error.message;
+      "PROCESSING ERROR\n\n" +
+      errorMessage;
 
 
     alert(
-      "Conversation could not be processed.\n\n" +
-      error.message
+
+      "BOMIS Conversation Error\n\n" +
+
+      errorMessage
+
     );
 
   }
@@ -975,6 +1198,7 @@ async function uploadAudio() {
 function showTranscript(
   transcript
 ) {
+
 
   conversationBox.textContent =
     transcript;
@@ -993,12 +1217,13 @@ function showTranscript(
       .value;
 
 
-  /* =====================================================
+  /* ================================================
      CREATE TEXT FILE
-     ===================================================== */
+     ================================================ */
 
   const textFile =
     new Blob(
+
       [
 
         "BOMIS CONVERSATION\n\n" +
@@ -1018,12 +1243,18 @@ function showTranscript(
       ],
 
       {
+
         type:
           "text/plain;charset=utf-8"
+
       }
 
     );
 
+
+  /* ================================================
+     CREATE DOWNLOAD URL
+     ================================================ */
 
   const url =
     URL.createObjectURL(
@@ -1057,7 +1288,12 @@ function showTranscript(
    ========================================================= */
 
 console.log(
-  "===== BOMIS GITHUB APP LOADED ====="
+  "===================================="
+);
+
+
+console.log(
+  "BOMIS CONVERSATION APP LOADED"
 );
 
 
@@ -1068,12 +1304,18 @@ console.log(
 
 
 console.log(
-  "Supabase Authorization:",
+  "Authorization:",
   "Enabled"
 );
 
 
+console.log(
+  "===================================="
+);
+
+
 </script>
+
 
 </body>
 </html>
