@@ -4,9 +4,7 @@
 
 <head>
   <meta charset="UTF-8">
-
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>BOMIS Conversation</title>
 
@@ -21,27 +19,26 @@
       padding: 20px;
       font-family: Arial, sans-serif;
       background: #f4f7fb;
-      color: #222;
     }
 
     .container {
       max-width: 850px;
-      margin: 20px auto;
+      margin: auto;
       background: white;
       padding: 30px;
       border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
     }
 
     h1 {
       text-align: center;
-      margin-bottom: 8px;
+      margin-bottom: 5px;
     }
 
     .subtitle {
       text-align: center;
       color: #666;
-      margin-bottom: 28px;
+      margin-bottom: 25px;
     }
 
     label {
@@ -61,15 +58,15 @@
 
     .buttons {
       display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
+      gap: 10px;
       margin-top: 25px;
+      flex-wrap: wrap;
     }
 
     button {
       flex: 1;
       min-width: 150px;
-      padding: 14px 18px;
+      padding: 14px;
       border: none;
       border-radius: 8px;
       font-size: 16px;
@@ -101,62 +98,44 @@
       margin-top: 20px;
       padding: 14px;
       border-radius: 8px;
-      background: #eef3f8;
       text-align: center;
       font-weight: bold;
+      background: #e9ecef;
     }
 
-    .conversation-title {
+    .title {
       margin-top: 30px;
-      margin-bottom: 10px;
       font-size: 20px;
       font-weight: bold;
     }
 
     #conversationBox {
+      margin-top: 10px;
       min-height: 250px;
       max-height: 500px;
       overflow-y: auto;
+      padding: 18px;
       border: 1px solid #ccc;
       border-radius: 10px;
-      padding: 18px;
       background: #fafafa;
       white-space: pre-wrap;
       line-height: 1.6;
-      font-size: 16px;
     }
-
-    .info {
-      margin-top: 20px;
-      padding: 12px;
-      background: #fff8e1;
-      border-radius: 8px;
-      font-size: 14px;
-      color: #555;
-    }
-
-    /*
-      Hidden Apps Script bridge
-    */
 
     #bridgeFrame {
       position: fixed;
       width: 1px;
       height: 1px;
-      left: -1000px;
-      top: -1000px;
+      left: -10000px;
+      top: -10000px;
       border: 0;
-      opacity: 0;
-      pointer-events: none;
     }
 
   </style>
-
 </head>
 
 
 <body>
-
 
 <div class="container">
 
@@ -167,45 +146,31 @@
   </div>
 
 
-  <!-- STUDENT NAME -->
-
-  <label for="studentName">
-    Student Name
-  </label>
+  <label>Student Name</label>
 
   <input
-    type="text"
     id="studentName"
+    type="text"
     placeholder="Enter student name"
   >
 
 
-  <!-- GRADE -->
-
-  <label for="grade">
-    Grade
-  </label>
+  <label>Grade</label>
 
   <input
-    type="text"
     id="grade"
+    type="text"
     placeholder="Enter grade"
   >
 
 
-  <!-- DATE -->
-
-  <label for="date">
-    Date
-  </label>
+  <label>Date</label>
 
   <input
-    type="date"
     id="date"
+    type="date"
   >
 
-
-  <!-- BUTTONS -->
 
   <div class="buttons">
 
@@ -216,7 +181,6 @@
       🎙 Start Recording
     </button>
 
-
     <button
       id="stopBtn"
       onclick="stopRecording()"
@@ -224,7 +188,6 @@
     >
       ⏹ Stop Recording
     </button>
-
 
     <button
       id="downloadBtn"
@@ -237,30 +200,17 @@
   </div>
 
 
-  <!-- STATUS -->
-
   <div id="statusBox">
-    Ready to record.
+    Connecting to BOMIS server...
   </div>
 
 
-  <!-- CONVERSATION -->
-
-  <div class="conversation-title">
+  <div class="title">
     Conversation
   </div>
 
   <div id="conversationBox">
-    Your conversation will appear here after recording.
-  </div>
-
-
-  <div class="info">
-
-    Speak normally with the student.
-    The system will identify different speakers
-    when Deepgram provides speaker information.
-
+    Conversation will appear here after recording.
   </div>
 
 </div>
@@ -284,6 +234,8 @@
    VARIABLES
 ========================================================= */
 
+let bridgeReady = false;
+
 let mediaRecorder = null;
 
 let audioChunks = [];
@@ -292,14 +244,15 @@ let audioBlob = null;
 
 let audioMimeType = "audio/webm";
 
-let bridgeReady = false;
-
 let processing = false;
 
 
 /* =========================================================
    ELEMENTS
 ========================================================= */
+
+const bridgeFrame =
+  document.getElementById("bridgeFrame");
 
 const startBtn =
   document.getElementById("startBtn");
@@ -316,62 +269,41 @@ const statusBox =
 const conversationBox =
   document.getElementById("conversationBox");
 
-const bridgeFrame =
-  document.getElementById("bridgeFrame");
-
 
 /* =========================================================
-   DATE
+   TODAY'S DATE
 ========================================================= */
 
-document.addEventListener(
-  "DOMContentLoaded",
-  function() {
+const today =
+  new Date();
 
-    const dateInput =
-      document.getElementById("date");
-
-    if (!dateInput.value) {
-
-      const today = new Date();
-
-      const year =
-        today.getFullYear();
-
-      const month =
-        String(
-          today.getMonth() + 1
-        ).padStart(2, "0");
-
-      const day =
-        String(
-          today.getDate()
-        ).padStart(2, "0");
-
-      dateInput.value =
-        year + "-" +
-        month + "-" +
-        day;
-    }
-
-  }
-);
+document.getElementById("date").value =
+  today.getFullYear() +
+  "-" +
+  String(today.getMonth() + 1).padStart(2, "0") +
+  "-" +
+  String(today.getDate()).padStart(2, "0");
 
 
 /* =========================================================
-   BRIDGE MESSAGE LISTENER
+   MESSAGE FROM BRIDGE
 ========================================================= */
 
 window.addEventListener(
   "message",
   function(event) {
 
-    const data =
-      event.data;
+    const data = event.data;
 
     if (!data) {
       return;
     }
+
+
+    console.log(
+      "GitHub received:",
+      data
+    );
 
 
     /* -----------------------------------------------------
@@ -385,21 +317,15 @@ window.addEventListener(
 
       bridgeReady = true;
 
+      statusBox.innerText =
+        "Connected. Ready to record.";
+
+      statusBox.style.background =
+        "#d1e7dd";
+
       console.log(
-        "BOMIS Bridge is connected."
+        "BOMIS Bridge READY"
       );
-
-      /*
-        Don't change the recording button here.
-        It is already enabled.
-      */
-
-      if (!processing) {
-
-        statusBox.innerText =
-          "Ready to record.";
-
-      }
 
       return;
     }
@@ -417,21 +343,23 @@ window.addEventListener(
       processing = true;
 
       statusBox.innerText =
-        "Processing conversation... Please wait.";
+        "Processing conversation...";
 
       statusBox.style.background =
         "#fff3cd";
 
-      startBtn.disabled = true;
+      startBtn.disabled =
+        true;
 
-      stopBtn.disabled = true;
+      stopBtn.disabled =
+        true;
 
       return;
     }
 
 
     /* -----------------------------------------------------
-       RESULT
+       FINAL RESULT
     ----------------------------------------------------- */
 
     if (
@@ -446,7 +374,7 @@ window.addEventListener(
 
 
       console.log(
-        "BOMIS RESULT:",
+        "Final result:",
         result
       );
 
@@ -458,15 +386,14 @@ window.addEventListener(
 
         conversationBox.innerText =
           result.transcript ||
-          "No conversation detected.";
+          "No speech detected.";
 
 
         statusBox.innerText =
-          "Conversation saved successfully.";
+          "✓ Conversation saved successfully.";
 
         statusBox.style.background =
           "#d1e7dd";
-
 
         startBtn.disabled =
           false;
@@ -475,24 +402,21 @@ window.addEventListener(
 
       else {
 
-        const errorMessage =
-          result &&
-          result.error
-            ? result.error
-            : "Unknown error occurred.";
-
-
         conversationBox.innerText =
-          "Error:\n\n" +
-          errorMessage;
+          "ERROR:\n\n" +
+          (
+            result &&
+            result.error
+              ? result.error
+              : "Unknown error"
+          );
 
 
         statusBox.innerText =
-          "Error while processing.";
+          "Error processing conversation.";
 
         statusBox.style.background =
           "#f8d7da";
-
 
         startBtn.disabled =
           false;
@@ -507,43 +431,52 @@ window.addEventListener(
 
 
 /* =========================================================
-   KEEP CONTACTING BRIDGE
+   BRIDGE HANDSHAKE
 ========================================================= */
 
-setInterval(
-  function() {
+function pingBridge() {
 
-    try {
+  if (
+    bridgeFrame &&
+    bridgeFrame.contentWindow
+  ) {
 
-      if (
-        bridgeFrame &&
-        bridgeFrame.contentWindow
-      ) {
+    console.log(
+      "Sending ping to Bridge..."
+    );
 
-        bridgeFrame
-          .contentWindow
-          .postMessage(
-            {
-              type: "BOMIS_PING"
-            },
-            "*"
-          );
-
-      }
-
-    }
-
-    catch(error) {
-
-      console.log(
-        "Bridge ping error:",
-        error
+    bridgeFrame
+      .contentWindow
+      .postMessage(
+        {
+          type: "BOMIS_PING"
+        },
+        "*"
       );
 
-    }
+  }
 
-  },
+}
+
+
+/*
+  Ping repeatedly because the Apps Script iframe can take
+  several seconds to load.
+*/
+
+setInterval(
+  pingBridge,
   1000
+);
+
+
+/*
+  First ping.
+*/
+
+setTimeout(
+  pingBridge,
+  500
 );
 
 
@@ -555,19 +488,20 @@ async function startRecording() {
 
 
   if (processing) {
-
     return;
-
   }
 
-
-  /* -------------------------------------------------------
-     STUDENT NAME
-  ------------------------------------------------------- */
 
   const studentName =
     document
       .getElementById("studentName")
+      .value
+      .trim();
+
+
+  const grade =
+    document
+      .getElementById("grade")
       .value
       .trim();
 
@@ -579,19 +513,7 @@ async function startRecording() {
     );
 
     return;
-
   }
-
-
-  /* -------------------------------------------------------
-     GRADE
-  ------------------------------------------------------- */
-
-  const grade =
-    document
-      .getElementById("grade")
-      .value
-      .trim();
 
 
   if (!grade) {
@@ -601,25 +523,16 @@ async function startRecording() {
     );
 
     return;
-
   }
 
 
-  /* -------------------------------------------------------
-     MICROPHONE
-  ------------------------------------------------------- */
-
-  if (
-    !navigator.mediaDevices ||
-    !navigator.mediaDevices.getUserMedia
-  ) {
+  if (!navigator.mediaDevices) {
 
     alert(
-      "Your browser does not support microphone recording."
+      "Microphone is not supported by this browser."
     );
 
     return;
-
   }
 
 
@@ -627,9 +540,6 @@ async function startRecording() {
 
     statusBox.innerText =
       "Requesting microphone permission...";
-
-    statusBox.style.background =
-      "#fff3cd";
 
 
     const stream =
@@ -641,46 +551,43 @@ async function startRecording() {
 
 
     console.log(
-      "Microphone access granted."
+      "Microphone permission granted."
     );
 
 
     /* -----------------------------------------------------
-       AUDIO FORMAT
+       FIND AUDIO FORMAT
     ----------------------------------------------------- */
 
     let options = {};
 
-    const possibleTypes = [
+    const formats = [
 
       "audio/webm;codecs=opus",
 
       "audio/webm",
 
-      "audio/ogg;codecs=opus",
-
-      "audio/mp4"
+      "audio/ogg;codecs=opus"
 
     ];
 
 
     for (
       let i = 0;
-      i < possibleTypes.length;
+      i < formats.length;
       i++
     ) {
 
       if (
         MediaRecorder.isTypeSupported(
-          possibleTypes[i]
+          formats[i]
         )
       ) {
 
         options.mimeType =
-          possibleTypes[i];
+          formats[i];
 
         break;
-
       }
 
     }
@@ -702,10 +609,6 @@ async function startRecording() {
 
     catch(error) {
 
-      console.log(
-        "Preferred format unavailable. Using default."
-      );
-
       mediaRecorder =
         new MediaRecorder(
           stream
@@ -716,7 +619,6 @@ async function startRecording() {
 
     audioMimeType =
       mediaRecorder.mimeType ||
-      options.mimeType ||
       "audio/webm";
 
 
@@ -747,252 +649,198 @@ async function startRecording() {
 
 
     /* -----------------------------------------------------
-       RECORDING STOPPED
+       STOP
     ----------------------------------------------------- */
 
     mediaRecorder.onstop =
-      async function() {
+      function() {
 
-        try {
-
-          audioBlob =
-            new Blob(
-              audioChunks,
-              {
-                type:
-                  audioMimeType
-              }
-            );
+        console.log(
+          "Recording stopped."
+        );
 
 
-          console.log(
-            "Audio blob size:",
-            audioBlob.size
+        audioBlob =
+          new Blob(
+            audioChunks,
+            {
+              type:
+                audioMimeType
+            }
           );
 
 
-          if (audioBlob.size === 0) {
-
-            throw new Error(
-              "The recording is empty."
-            );
-
-          }
+        console.log(
+          "Audio size:",
+          audioBlob.size
+        );
 
 
-          downloadBtn.disabled =
-            false;
-
-
-          /*
-            Stop microphone.
-          */
-
-          stream
-            .getTracks()
-            .forEach(
-              function(track) {
-                track.stop();
-              }
-            );
-
+        if (
+          audioBlob.size === 0
+        ) {
 
           statusBox.innerText =
-            "Preparing conversation...";
+            "Recording was empty.";
 
-          statusBox.style.background =
-            "#fff3cd";
-
-
-          /* ------------------------------------------------
-             CONVERT AUDIO TO DATA URL
-          ------------------------------------------------ */
-
-          const reader =
-            new FileReader();
+          return;
+        }
 
 
-          reader.onloadend =
-            function() {
-
-              const dataUrl =
-                reader.result;
+        downloadBtn.disabled =
+          false;
 
 
-              console.log(
-                "Audio Data URL created."
-              );
+        stream
+          .getTracks()
+          .forEach(
+            function(track) {
+              track.stop();
+            }
+          );
 
 
-              console.log(
-                "Data URL length:",
-                dataUrl
-                  ? dataUrl.length
-                  : 0
-              );
+        statusBox.innerText =
+          "Preparing audio...";
 
 
-              if (!dataUrl) {
+        /* -------------------------------------------------
+           CONVERT TO DATA URL
+        ------------------------------------------------- */
 
-                statusBox.innerText =
-                  "Could not prepare audio.";
-
-                return;
-
-              }
+        const reader =
+          new FileReader();
 
 
-              /* --------------------------------------------
-                 FORM DATA
-              -------------------------------------------- */
+        reader.onloadend =
+          function() {
 
-              const studentName =
-                document
-                  .getElementById("studentName")
-                  .value
-                  .trim();
+            const dataUrl =
+              reader.result;
 
 
-              const grade =
-                document
-                  .getElementById("grade")
-                  .value
-                  .trim();
+            console.log(
+              "Data URL length:",
+              dataUrl
+                ? dataUrl.length
+                : 0
+            );
 
 
-              const date =
-                document
-                  .getElementById("date")
-                  .value;
-
-
-              /* --------------------------------------------
-                 SEND TO BRIDGE
-              -------------------------------------------- */
+            if (!dataUrl) {
 
               statusBox.innerText =
-                "Sending audio for transcription...";
+                "Could not prepare audio.";
 
+              return;
+            }
+
+
+            const studentName =
+              document
+                .getElementById("studentName")
+                .value
+                .trim();
+
+
+            const grade =
+              document
+                .getElementById("grade")
+                .value
+                .trim();
+
+
+            const date =
+              document
+                .getElementById("date")
+                .value;
+
+
+            /* ---------------------------------------------
+               CHECK BRIDGE
+            --------------------------------------------- */
+
+            if (!bridgeReady) {
+
+              statusBox.innerText =
+                "Bridge is still connecting. Please wait a moment and try again.";
 
               statusBox.style.background =
                 "#fff3cd";
 
+              startBtn.disabled =
+                false;
 
-              if (
-                bridgeFrame &&
-                bridgeFrame.contentWindow
-              ) {
-
-                bridgeFrame
-                  .contentWindow
-                  .postMessage(
-
-                    {
-
-                      type:
-                        "PROCESS_AUDIO",
-
-                      audioDataUrl:
-                        dataUrl,
-
-                      mimeType:
-                        audioMimeType,
-
-                      studentName:
-                        studentName,
-
-                      grade:
-                        grade,
-
-                      date:
-                        date
-
-                    },
-
-                    "*"
-
-                  );
+              return;
+            }
 
 
-                console.log(
-                  "Audio sent to Apps Script bridge."
-                );
+            /* ---------------------------------------------
+               SEND TO BRIDGE
+            --------------------------------------------- */
+
+            statusBox.innerText =
+              "Sending audio for transcription...";
 
 
-                /*
-                  Give the bridge a little time.
-                  If it doesn't respond, show a useful message.
-                */
-
-                setTimeout(
-                  function() {
-
-                    if (
-                      !processing
-                    ) {
-
-                      statusBox.innerText =
-                        "Audio sent. Waiting for transcription...";
-
-                    }
-
-                  },
-                  3000
-                );
-
-              }
-
-              else {
-
-                statusBox.innerText =
-                  "Apps Script bridge is not available.";
-
-                statusBox.style.background =
-                  "#f8d7da";
-
-              }
-
-            };
+            statusBox.style.background =
+              "#fff3cd";
 
 
-          reader.onerror =
-            function(error) {
+            bridgeFrame
+              .contentWindow
+              .postMessage(
 
-              console.error(
-                "FileReader error:",
-                error
+                {
+
+                  type:
+                    "PROCESS_AUDIO",
+
+                  audioDataUrl:
+                    dataUrl,
+
+                  mimeType:
+                    audioMimeType,
+
+                  studentName:
+                    studentName,
+
+                  grade:
+                    grade,
+
+                  date:
+                    date
+
+                },
+
+                "*"
+
               );
 
-              statusBox.innerText =
-                "Error converting recording.";
 
-              statusBox.style.background =
-                "#f8d7da";
+            console.log(
+              "Audio sent to Bridge."
+            );
 
-            };
+          };
 
 
-          reader.readAsDataURL(
-            audioBlob
-          );
+        reader.onerror =
+          function(error) {
 
-        }
+            console.error(
+              error
+            );
 
-        catch(error) {
+            statusBox.innerText =
+              "Error reading audio.";
 
-          console.error(
-            "Recording stop error:",
-            error
-          );
+          };
 
-          statusBox.innerText =
-            "Error: " +
-            error.message;
 
-          statusBox.style.background =
-            "#f8d7da";
-
-        }
+        reader.readAsDataURL(
+          audioBlob
+        );
 
       };
 
@@ -1015,7 +863,7 @@ async function startRecording() {
 
 
     statusBox.innerText =
-      "🔴 Recording... Speak with the student.";
+      "🔴 Recording...";
 
     statusBox.style.background =
       "#f8d7da";
@@ -1042,9 +890,8 @@ async function startRecording() {
     statusBox.style.background =
       "#f8d7da";
 
-
     alert(
-      "Microphone access was not granted. Please allow microphone access in Chrome."
+      "Please allow microphone access in Chrome."
     );
 
   }
@@ -1058,7 +905,6 @@ async function startRecording() {
 
 function stopRecording() {
 
-
   if (
     mediaRecorder &&
     mediaRecorder.state !== "inactive"
@@ -1067,9 +913,7 @@ function stopRecording() {
     statusBox.innerText =
       "Stopping recording...";
 
-
     mediaRecorder.stop();
-
 
     stopBtn.disabled =
       true;
@@ -1088,15 +932,13 @@ function stopRecording() {
 
 function downloadAudio() {
 
-
   if (!audioBlob) {
 
     alert(
-      "No recording is available."
+      "No recording available."
     );
 
     return;
-
   }
 
 
@@ -1116,49 +958,43 @@ function downloadAudio() {
     "Grade";
 
 
-  const cleanStudentName =
+  const safeName =
     studentName.replace(
       /[^a-zA-Z0-9_-]/g,
       "_"
     );
 
 
-  const cleanGrade =
+  const safeGrade =
     grade.replace(
       /[^a-zA-Z0-9_-]/g,
       "_"
     );
 
 
-  let extension = "webm";
+  let extension =
+    "webm";
 
 
   if (
     audioMimeType.includes("ogg")
   ) {
 
-    extension = "ogg";
-
-  }
-
-  else if (
-    audioMimeType.includes("mp4")
-  ) {
-
-    extension = "mp4";
+    extension =
+      "ogg";
 
   }
 
 
   const fileName =
-    cleanStudentName +
+    safeName +
     "_" +
-    cleanGrade +
+    safeGrade +
     "_Conversation." +
     extension;
 
 
-  const audioUrl =
+  const url =
     URL.createObjectURL(
       audioBlob
     );
@@ -1169,7 +1005,7 @@ function downloadAudio() {
 
 
   link.href =
-    audioUrl;
+    url;
 
   link.download =
     fileName;
@@ -1190,7 +1026,7 @@ function downloadAudio() {
     function() {
 
       URL.revokeObjectURL(
-        audioUrl
+        url
       );
 
     },
@@ -1204,23 +1040,23 @@ function downloadAudio() {
    INITIAL STATE
 ========================================================= */
 
-startBtn.disabled = false;
+startBtn.disabled =
+  true;
 
-stopBtn.disabled = true;
+stopBtn.disabled =
+  true;
 
-downloadBtn.disabled = true;
+downloadBtn.disabled =
+  true;
 
-statusBox.innerText =
-  "Ready to record.";
 
-console.log(
-  "BOMIS Conversation loaded."
-);
+/*
+  We intentionally enable Start only after the bridge
+  confirms its connection.
+*/
 
 </script>
 
-
 </body>
-
 </html>
 ```
