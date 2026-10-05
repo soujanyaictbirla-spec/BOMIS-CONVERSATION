@@ -162,6 +162,7 @@
     }
 
     @media (max-width: 600px) {
+
       .container {
         padding: 20px;
       }
@@ -177,6 +178,7 @@
       button {
         width: 100%;
       }
+
     }
   </style>
 </head>
@@ -194,6 +196,7 @@
   <div class="form-row">
 
     <div>
+
       <label for="studentName">
         Student Name
       </label>
@@ -203,9 +206,11 @@
         id="studentName"
         placeholder="Enter student name"
       >
+
     </div>
 
     <div>
+
       <label for="grade">
         Grade
       </label>
@@ -230,9 +235,11 @@
         <option>Grade 12</option>
 
       </select>
+
     </div>
 
   </div>
+
 
   <div class="buttons">
 
@@ -253,12 +260,14 @@
 
   </div>
 
+
   <div
     class="timer"
     id="timer"
   >
     00:00
   </div>
+
 
   <div
     class="status"
@@ -267,13 +276,16 @@
     Ready to record
   </div>
 
+
   <div class="conversation-title">
     Conversation
   </div>
 
+
   <div id="conversationBox">
     Your conversation will appear here after processing.
   </div>
+
 
   <div class="download-area">
 
@@ -291,12 +303,21 @@
 
 <script>
 
+
 /* =========================================================
    SUPABASE EDGE FUNCTION
    ========================================================= */
 
 const SUPABASE_FUNCTION_URL =
   "https://pvlmonbewsbqnfvxcxop.supabase.co/functions/v1/process-conversation";
+
+
+/* =========================================================
+   SUPABASE PUBLISHABLE KEY
+   ========================================================= */
+
+const SUPABASE_ANON_KEY =
+  "sb_publishable_xexykXG0TiKSCJpU_mGWUg_xbJ4-NST";
 
 
 /* =========================================================
@@ -315,7 +336,7 @@ let audioBlob = null;
 
 
 /* =========================================================
-   ELEMENTS
+   HTML ELEMENTS
    ========================================================= */
 
 const startBtn =
@@ -345,7 +366,10 @@ function setStatus(message) {
 
   status.textContent = message;
 
-  console.log("STATUS:", message);
+  console.log(
+    "STATUS:",
+    message
+  );
 
 }
 
@@ -364,28 +388,38 @@ async function startRecording() {
         .value
         .trim();
 
+
     const grade =
       document
         .getElementById("grade")
         .value;
 
+
     if (!studentName) {
 
-      alert("Please enter Student Name.");
+      alert(
+        "Please enter Student Name."
+      );
 
       return;
+
     }
+
 
     if (!grade) {
 
-      alert("Please select Grade.");
+      alert(
+        "Please select Grade."
+      );
 
       return;
+
     }
 
 
     conversationBox.textContent =
       "Recording conversation...";
+
 
     downloadLink.style.display =
       "none";
@@ -396,8 +430,13 @@ async function startRecording() {
     );
 
 
+    /* =====================================================
+       REQUEST MICROPHONE
+       ===================================================== */
+
     const stream =
-      await navigator.mediaDevices
+      await navigator
+        .mediaDevices
         .getUserMedia({
           audio: true
         });
@@ -406,7 +445,12 @@ async function startRecording() {
     audioChunks = [];
 
 
+    /* =====================================================
+       AUDIO FORMAT
+       ===================================================== */
+
     let options = {};
+
 
     if (
       MediaRecorder.isTypeSupported(
@@ -417,7 +461,9 @@ async function startRecording() {
       options.mimeType =
         "audio/webm;codecs=opus";
 
-    } else if (
+    }
+
+    else if (
       MediaRecorder.isTypeSupported(
         "audio/webm"
       )
@@ -425,8 +471,13 @@ async function startRecording() {
 
       options.mimeType =
         "audio/webm";
+
     }
 
+
+    /* =====================================================
+       MEDIA RECORDER
+       ===================================================== */
 
     mediaRecorder =
       new MediaRecorder(
@@ -435,10 +486,17 @@ async function startRecording() {
       );
 
 
+    /* =====================================================
+       COLLECT AUDIO
+       ===================================================== */
+
     mediaRecorder.ondataavailable =
       function(event) {
 
-        if (event.data.size > 0) {
+        if (
+          event.data &&
+          event.data.size > 0
+        ) {
 
           audioChunks.push(
             event.data
@@ -448,6 +506,10 @@ async function startRecording() {
 
       };
 
+
+    /* =====================================================
+       WHEN RECORDING STOPS
+       ===================================================== */
 
     mediaRecorder.onstop =
       function() {
@@ -469,7 +531,14 @@ async function startRecording() {
         );
 
 
-        // Stop microphone
+        console.log(
+          "Audio type:",
+          audioBlob.type
+        );
+
+
+        /* Stop microphone */
+
         stream
           .getTracks()
           .forEach(
@@ -479,8 +548,13 @@ async function startRecording() {
 
 
         uploadAudio();
+
       };
 
+
+    /* =====================================================
+       START
+       ===================================================== */
 
     mediaRecorder.start();
 
@@ -499,6 +573,7 @@ async function startRecording() {
     startBtn.disabled =
       true;
 
+
     stopBtn.disabled =
       false;
 
@@ -512,16 +587,22 @@ async function startRecording() {
       "Recording started."
     );
 
-  } catch (error) {
+  }
+
+
+  catch (error) {
 
     console.error(
+      "Microphone error:",
       error
     );
+
 
     setStatus(
       "Microphone error: " +
       error.message
     );
+
 
     alert(
       "Unable to access microphone.\n\n" +
@@ -545,6 +626,7 @@ function stopRecording() {
   ) {
 
     return;
+
   }
 
 
@@ -563,6 +645,7 @@ function stopRecording() {
 
   startBtn.disabled =
     false;
+
 
   stopBtn.disabled =
     true;
@@ -584,6 +667,7 @@ function updateTimer() {
   if (!recordingStartTime) {
 
     return;
+
   }
 
 
@@ -624,11 +708,15 @@ async function uploadAudio() {
 
   try {
 
-    if (!audioBlob) {
+    if (
+      !audioBlob ||
+      audioBlob.size === 0
+    ) {
 
       throw new Error(
         "Audio recording is empty."
       );
+
     }
 
 
@@ -640,6 +728,10 @@ async function uploadAudio() {
     conversationBox.textContent =
       "Sending audio to Deepgram...";
 
+
+    /* =====================================================
+       STUDENT DETAILS
+       ===================================================== */
 
     const studentName =
       document
@@ -653,6 +745,10 @@ async function uploadAudio() {
         .getElementById("grade")
         .value;
 
+
+    /* =====================================================
+       DATE
+       ===================================================== */
 
     const today =
       new Date();
@@ -684,9 +780,9 @@ async function uploadAudio() {
       `${year}-${month}-${day}`;
 
 
-    /* -----------------------------------------
+    /* =====================================================
        FORM DATA
-       ----------------------------------------- */
+       ===================================================== */
 
     const formData =
       new FormData();
@@ -722,22 +818,51 @@ async function uploadAudio() {
     );
 
 
-    /* -----------------------------------------
+    console.log(
+      "Function URL:",
+      SUPABASE_FUNCTION_URL
+    );
+
+
+    /* =====================================================
        SEND TO SUPABASE
-       ----------------------------------------- */
+       
+       IMPORTANT:
+       Authorization header added here.
+       ===================================================== */
 
     const response =
       await fetch(
         SUPABASE_FUNCTION_URL,
         {
           method: "POST",
+
+          headers: {
+
+            "Authorization":
+              "Bearer " +
+              SUPABASE_ANON_KEY
+
+          },
+
           body: formData
+
         }
       );
 
 
+    /* =====================================================
+       READ RESPONSE
+       ===================================================== */
+
     const responseText =
       await response.text();
+
+
+    console.log(
+      "Supabase HTTP status:",
+      response.status
+    );
 
 
     console.log(
@@ -756,7 +881,9 @@ async function uploadAudio() {
           responseText
         );
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
       throw new Error(
         "Invalid response from Supabase:\n" +
@@ -766,10 +893,15 @@ async function uploadAudio() {
     }
 
 
+    /* =====================================================
+       ERROR
+       ===================================================== */
+
     if (!response.ok) {
 
       throw new Error(
         result.error ||
+        result.message ||
         "Supabase processing failed."
       );
 
@@ -786,9 +918,9 @@ async function uploadAudio() {
     }
 
 
-    /* -----------------------------------------
+    /* =====================================================
        SHOW TRANSCRIPT
-       ----------------------------------------- */
+       ===================================================== */
 
     showTranscript(
       result.conversation
@@ -800,7 +932,15 @@ async function uploadAudio() {
     );
 
 
-  } catch (error) {
+    console.log(
+      "Conversation successfully processed."
+    );
+
+
+  }
+
+
+  catch (error) {
 
     console.error(
       "Processing error:",
@@ -840,10 +980,6 @@ function showTranscript(
     transcript;
 
 
-  /* -----------------------------------------
-     DOWNLOAD TXT FILE
-     ----------------------------------------- */
-
   const studentName =
     document
       .getElementById("studentName")
@@ -857,22 +993,35 @@ function showTranscript(
       .value;
 
 
+  /* =====================================================
+     CREATE TEXT FILE
+     ===================================================== */
+
   const textFile =
     new Blob(
       [
+
         "BOMIS CONVERSATION\n\n" +
+
         "Student Name: " +
         studentName +
+
         "\n" +
+
         "Grade: " +
         grade +
+
         "\n\n" +
+
         transcript
+
       ],
+
       {
         type:
           "text/plain;charset=utf-8"
       }
+
     );
 
 
@@ -888,10 +1037,12 @@ function showTranscript(
 
   downloadLink.download =
     "BOMIS_" +
+
     studentName.replace(
       /\s+/g,
       "_"
     ) +
+
     "_Conversation.txt";
 
 
@@ -902,17 +1053,25 @@ function showTranscript(
 
 
 /* =========================================================
-   INITIAL MESSAGE
+   PAGE LOADED
    ========================================================= */
 
 console.log(
   "===== BOMIS GITHUB APP LOADED ====="
 );
 
+
 console.log(
   "Supabase Function:",
   SUPABASE_FUNCTION_URL
 );
+
+
+console.log(
+  "Supabase Authorization:",
+  "Enabled"
+);
+
 
 </script>
 
