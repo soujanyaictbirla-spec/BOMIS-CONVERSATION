@@ -3,7 +3,6 @@
 <html lang="en">
 
 <head>
-
   <meta charset="UTF-8">
 
   <meta name="viewport"
@@ -19,7 +18,7 @@
 
     body {
       margin: 0;
-      padding: 0;
+      padding: 20px;
       font-family: Arial, sans-serif;
       background: #f4f7fb;
       color: #222;
@@ -27,7 +26,7 @@
 
     .container {
       max-width: 850px;
-      margin: 30px auto;
+      margin: 20px auto;
       background: white;
       padding: 30px;
       border-radius: 16px;
@@ -36,13 +35,13 @@
 
     h1 {
       text-align: center;
-      margin-bottom: 25px;
+      margin-bottom: 8px;
     }
 
     .subtitle {
       text-align: center;
       color: #666;
-      margin-bottom: 30px;
+      margin-bottom: 28px;
     }
 
     label {
@@ -70,7 +69,7 @@
     button {
       flex: 1;
       min-width: 150px;
-      padding: 13px 18px;
+      padding: 14px 18px;
       border: none;
       border-radius: 8px;
       font-size: 16px;
@@ -136,16 +135,19 @@
       color: #555;
     }
 
-    /* Hidden Apps Script bridge */
+    /*
+      Hidden Apps Script bridge
+    */
+
     #bridgeFrame {
       position: fixed;
       width: 1px;
       height: 1px;
+      left: -1000px;
+      top: -1000px;
       border: 0;
       opacity: 0;
       pointer-events: none;
-      left: -100px;
-      top: -100px;
     }
 
   </style>
@@ -238,7 +240,7 @@
   <!-- STATUS -->
 
   <div id="statusBox">
-    Connecting to server...
+    Ready to record.
   </div>
 
 
@@ -256,8 +258,8 @@
   <div class="info">
 
     Speak normally with the student.
-    The system will attempt to identify different speakers
-    as Person 1, Person 2, etc.
+    The system will identify different speakers
+    when Deepgram provides speaker information.
 
   </div>
 
@@ -265,7 +267,7 @@
 
 
 <!-- =====================================================
-     HIDDEN APPS SCRIPT BRIDGE
+     APPS SCRIPT BRIDGE
 ===================================================== -->
 
 <iframe
@@ -292,7 +294,7 @@ let audioMimeType = "audio/webm";
 
 let bridgeReady = false;
 
-let recording = false;
+let processing = false;
 
 
 /* =========================================================
@@ -319,7 +321,7 @@ const bridgeFrame =
 
 
 /* =========================================================
-   SET TODAY'S DATE
+   DATE
 ========================================================= */
 
 document.addEventListener(
@@ -331,8 +333,7 @@ document.addEventListener(
 
     if (!dateInput.value) {
 
-      const today =
-        new Date();
+      const today = new Date();
 
       const year =
         today.getFullYear();
@@ -351,7 +352,6 @@ document.addEventListener(
         year + "-" +
         month + "-" +
         day;
-
     }
 
   }
@@ -359,7 +359,7 @@ document.addEventListener(
 
 
 /* =========================================================
-   RECEIVE MESSAGES FROM APPS SCRIPT BRIDGE
+   BRIDGE MESSAGE LISTENER
 ========================================================= */
 
 window.addEventListener(
@@ -368,7 +368,6 @@ window.addEventListener(
 
     const data =
       event.data;
-
 
     if (!data) {
       return;
@@ -386,17 +385,21 @@ window.addEventListener(
 
       bridgeReady = true;
 
-      statusBox.innerText =
-        "Connected. Ready to record.";
-
-      statusBox.style.background =
-        "#e8f5e9";
-
-      startBtn.disabled = false;
-
       console.log(
-        "BOMIS Bridge connected."
+        "BOMIS Bridge is connected."
       );
+
+      /*
+        Don't change the recording button here.
+        It is already enabled.
+      */
+
+      if (!processing) {
+
+        statusBox.innerText =
+          "Ready to record.";
+
+      }
 
       return;
     }
@@ -410,6 +413,8 @@ window.addEventListener(
       data.type ===
       "BOMIS_PROCESSING"
     ) {
+
+      processing = true;
 
       statusBox.innerText =
         "Processing conversation... Please wait.";
@@ -434,12 +439,14 @@ window.addEventListener(
       "BOMIS_RESULT"
     ) {
 
+      processing = false;
+
       const result =
         data.result;
 
 
       console.log(
-        "BOMIS result:",
+        "BOMIS RESULT:",
         result
       );
 
@@ -460,7 +467,9 @@ window.addEventListener(
         statusBox.style.background =
           "#d1e7dd";
 
-        startBtn.disabled = false;
+
+        startBtn.disabled =
+          false;
 
       }
 
@@ -479,12 +488,14 @@ window.addEventListener(
 
 
         statusBox.innerText =
-          "Error while processing conversation.";
+          "Error while processing.";
 
         statusBox.style.background =
           "#f8d7da";
 
-        startBtn.disabled = false;
+
+        startBtn.disabled =
+          false;
 
       }
 
@@ -496,22 +507,37 @@ window.addEventListener(
 
 
 /* =========================================================
-   PING THE BRIDGE
+   KEEP CONTACTING BRIDGE
 ========================================================= */
 
 setInterval(
   function() {
 
-    if (
-      bridgeFrame &&
-      bridgeFrame.contentWindow
-    ) {
+    try {
 
-      bridgeFrame.contentWindow.postMessage(
-        {
-          type: "BOMIS_PING"
-        },
-        "*"
+      if (
+        bridgeFrame &&
+        bridgeFrame.contentWindow
+      ) {
+
+        bridgeFrame
+          .contentWindow
+          .postMessage(
+            {
+              type: "BOMIS_PING"
+            },
+            "*"
+          );
+
+      }
+
+    }
+
+    catch(error) {
+
+      console.log(
+        "Bridge ping error:",
+        error
       );
 
     }
@@ -528,14 +554,7 @@ setInterval(
 async function startRecording() {
 
 
-  /* -------------------------------------------------------
-     CHECK BRIDGE
-  ------------------------------------------------------- */
-
-  if (!bridgeReady) {
-
-    statusBox.innerText =
-      "Connecting to server... Please wait.";
+  if (processing) {
 
     return;
 
@@ -543,7 +562,7 @@ async function startRecording() {
 
 
   /* -------------------------------------------------------
-     CHECK STUDENT NAME
+     STUDENT NAME
   ------------------------------------------------------- */
 
   const studentName =
@@ -565,7 +584,7 @@ async function startRecording() {
 
 
   /* -------------------------------------------------------
-     CHECK GRADE
+     GRADE
   ------------------------------------------------------- */
 
   const grade =
@@ -587,10 +606,31 @@ async function startRecording() {
 
 
   /* -------------------------------------------------------
-     GET MICROPHONE
+     MICROPHONE
   ------------------------------------------------------- */
 
+  if (
+    !navigator.mediaDevices ||
+    !navigator.mediaDevices.getUserMedia
+  ) {
+
+    alert(
+      "Your browser does not support microphone recording."
+    );
+
+    return;
+
+  }
+
+
   try {
+
+    statusBox.innerText =
+      "Requesting microphone permission...";
+
+    statusBox.style.background =
+      "#fff3cd";
+
 
     const stream =
       await navigator
@@ -600,8 +640,13 @@ async function startRecording() {
         });
 
 
+    console.log(
+      "Microphone access granted."
+    );
+
+
     /* -----------------------------------------------------
-       FIND SUPPORTED AUDIO FORMAT
+       AUDIO FORMAT
     ----------------------------------------------------- */
 
     let options = {};
@@ -657,6 +702,10 @@ async function startRecording() {
 
     catch(error) {
 
+      console.log(
+        "Preferred format unavailable. Using default."
+      );
+
       mediaRecorder =
         new MediaRecorder(
           stream
@@ -677,7 +726,7 @@ async function startRecording() {
 
 
     /* -----------------------------------------------------
-       WHEN DATA ARRIVES
+       AUDIO DATA
     ----------------------------------------------------- */
 
     mediaRecorder.ondataavailable =
@@ -698,7 +747,7 @@ async function startRecording() {
 
 
     /* -----------------------------------------------------
-       WHEN RECORDING STOPS
+       RECORDING STOPPED
     ----------------------------------------------------- */
 
     mediaRecorder.onstop =
@@ -722,17 +771,22 @@ async function startRecording() {
           );
 
 
+          if (audioBlob.size === 0) {
+
+            throw new Error(
+              "The recording is empty."
+            );
+
+          }
+
+
           downloadBtn.disabled =
             false;
 
 
-          statusBox.innerText =
-            "Preparing audio for transcription...";
-
-
-          /* ------------------------------------------------
-             STOP MICROPHONE
-          ------------------------------------------------ */
+          /*
+            Stop microphone.
+          */
 
           stream
             .getTracks()
@@ -741,6 +795,13 @@ async function startRecording() {
                 track.stop();
               }
             );
+
+
+          statusBox.innerText =
+            "Preparing conversation...";
+
+          statusBox.style.background =
+            "#fff3cd";
 
 
           /* ------------------------------------------------
@@ -759,7 +820,7 @@ async function startRecording() {
 
 
               console.log(
-                "Data URL created."
+                "Audio Data URL created."
               );
 
 
@@ -774,7 +835,7 @@ async function startRecording() {
               if (!dataUrl) {
 
                 statusBox.innerText =
-                  "Unable to prepare audio.";
+                  "Could not prepare audio.";
 
                 return;
 
@@ -782,7 +843,7 @@ async function startRecording() {
 
 
               /* --------------------------------------------
-                 GET FORM VALUES
+                 FORM DATA
               -------------------------------------------- */
 
               const studentName =
@@ -806,54 +867,90 @@ async function startRecording() {
 
 
               /* --------------------------------------------
-                 SEND AUDIO TO BRIDGE
+                 SEND TO BRIDGE
               -------------------------------------------- */
-
-              if (
-                !bridgeFrame.contentWindow
-              ) {
-
-                statusBox.innerText =
-                  "Bridge is unavailable.";
-
-                return;
-
-              }
-
 
               statusBox.innerText =
                 "Sending audio for transcription...";
 
 
-              bridgeFrame
-                .contentWindow
-                .postMessage(
+              statusBox.style.background =
+                "#fff3cd";
 
-                  {
 
-                    type:
-                      "PROCESS_AUDIO",
+              if (
+                bridgeFrame &&
+                bridgeFrame.contentWindow
+              ) {
 
-                    audioDataUrl:
-                      dataUrl,
+                bridgeFrame
+                  .contentWindow
+                  .postMessage(
 
-                    mimeType:
-                      audioMimeType,
+                    {
 
-                    studentName:
-                      studentName,
+                      type:
+                        "PROCESS_AUDIO",
 
-                    grade:
-                      grade,
+                      audioDataUrl:
+                        dataUrl,
 
-                    date:
-                      date
+                      mimeType:
+                        audioMimeType,
+
+                      studentName:
+                        studentName,
+
+                      grade:
+                        grade,
+
+                      date:
+                        date
+
+                    },
+
+                    "*"
+
+                  );
+
+
+                console.log(
+                  "Audio sent to Apps Script bridge."
+                );
+
+
+                /*
+                  Give the bridge a little time.
+                  If it doesn't respond, show a useful message.
+                */
+
+                setTimeout(
+                  function() {
+
+                    if (
+                      !processing
+                    ) {
+
+                      statusBox.innerText =
+                        "Audio sent. Waiting for transcription...";
+
+                    }
 
                   },
-
-                  "*"
-
+                  3000
                 );
+
+              }
+
+              else {
+
+                statusBox.innerText =
+                  "Apps Script bridge is not available.";
+
+                statusBox.style.background =
+                  "#f8d7da";
+
+              }
 
             };
 
@@ -867,7 +964,10 @@ async function startRecording() {
               );
 
               statusBox.innerText =
-                "Unable to convert audio.";
+                "Error converting recording.";
+
+              statusBox.style.background =
+                "#f8d7da";
 
             };
 
@@ -881,13 +981,16 @@ async function startRecording() {
         catch(error) {
 
           console.error(
-            "Stop processing error:",
+            "Recording stop error:",
             error
           );
 
           statusBox.innerText =
-            "Error preparing recording: " +
+            "Error: " +
             error.message;
+
+          statusBox.style.background =
+            "#f8d7da";
 
         }
 
@@ -898,12 +1001,7 @@ async function startRecording() {
        START
     ----------------------------------------------------- */
 
-    mediaRecorder.start(
-      1000
-    );
-
-
-    recording = true;
+    mediaRecorder.start(1000);
 
 
     startBtn.disabled =
@@ -917,7 +1015,7 @@ async function startRecording() {
 
 
     statusBox.innerText =
-      "Recording... Speak with the student.";
+      "🔴 Recording... Speak with the student.";
 
     statusBox.style.background =
       "#f8d7da";
@@ -941,13 +1039,12 @@ async function startRecording() {
       "Microphone error: " +
       error.message;
 
-
     statusBox.style.background =
       "#f8d7da";
 
 
     alert(
-      "Microphone access is required. Please allow microphone permission in Chrome and try again."
+      "Microphone access was not granted. Please allow microphone access in Chrome."
     );
 
   }
@@ -967,24 +1064,18 @@ function stopRecording() {
     mediaRecorder.state !== "inactive"
   ) {
 
+    statusBox.innerText =
+      "Stopping recording...";
+
+
     mediaRecorder.stop();
 
-    recording = false;
-
-
-    startBtn.disabled =
-      true;
 
     stopBtn.disabled =
       true;
 
-
-    statusBox.innerText =
-      "Recording stopped. Processing...";
-
-
-    statusBox.style.background =
-      "#fff3cd";
+    startBtn.disabled =
+      true;
 
   }
 
@@ -1025,10 +1116,6 @@ function downloadAudio() {
     "Grade";
 
 
-  /* -------------------------------------------------------
-     CLEAN FILE NAME
-  ------------------------------------------------------- */
-
   const cleanStudentName =
     studentName.replace(
       /[^a-zA-Z0-9_-]/g,
@@ -1043,12 +1130,24 @@ function downloadAudio() {
     );
 
 
-  const extension =
+  let extension = "webm";
+
+
+  if (
     audioMimeType.includes("ogg")
-      ? "ogg"
-      : audioMimeType.includes("mp4")
-        ? "mp4"
-        : "webm";
+  ) {
+
+    extension = "ogg";
+
+  }
+
+  else if (
+    audioMimeType.includes("mp4")
+  ) {
+
+    extension = "mp4";
+
+  }
 
 
   const fileName =
@@ -1105,24 +1204,23 @@ function downloadAudio() {
    INITIAL STATE
 ========================================================= */
 
-startBtn.disabled = true;
+startBtn.disabled = false;
 
 stopBtn.disabled = true;
 
 downloadBtn.disabled = true;
 
-
 statusBox.innerText =
-  "Connecting to server...";
-
+  "Ready to record.";
 
 console.log(
-  "BOMIS Conversation GitHub app loaded."
+  "BOMIS Conversation loaded."
 );
 
 </script>
 
 
 </body>
+
 </html>
 ```
